@@ -3,11 +3,11 @@
 <html>
 <head>
 	<meta charset="utf-8">
-	<title>Blog Archives - Code is Rune</title>
+	<title>Hello Octopress - Code is Rune</title>
 	<meta name="author" content="Mercurial Lee">
 
 	
-	<meta name="description" content=" 2014 Hello Octopress Mar 27 ">
+	<meta name="description" content="为什么我们总是喜欢以hello world这种形式来表达第一次做什么什么？我实在答不上来，我本来想好好写第一篇博文的，结果disqus那边搭建貌似需要加载一次评论的那块div，而且该死的是octopress不像别的博客平台都会自己先来一篇示例，所以只能凑合着来篇hello world， &hellip;">
 	
 	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
 
@@ -77,27 +77,87 @@
 	
 		
 	
-	<div id="content" class="inner">
-	
+	<div id="content" class="inner"><article class="post">
+	<h2 class="title">Hello Octopress</h2>
+	<div class="entry-content"><ul>
+<li><p>为什么我们总是喜欢以<code>hello world</code>这种形式来表达第一次做什么什么？我实在答不上来，我本来想好好写第一篇博文的，结果disqus那边搭建貌似需要加载一次评论的那块div，而且该死的是octopress不像别的博客平台都会自己先来一篇示例，所以只能凑合着来篇hello world，顺便粘点python代码吧，就粘个组合数的递归实现吧！
+&#8220;`python
+def C(l,m):
+  if type(l)==type([]):
+      n=len(l)
+      elif type(l)==type(0) : n=l;l=range(1,n+1)
+      else : raise TypeError</p>
 
+<pre><code>         i=1;s=2;li=[1]*(m+1)
+         L=[]
 
-	
-	
-	<section class="archives"><h1 class="year">2014</h1>
+         while s!=0:
+         if s!=m :
+         if li[s] != n+s-m :
+         li[s]+=1
+         li[s+1]=li[s]
+         s+=1
+         else : s-=1
 
-<article>
-	<h2 class="title"><a href="/blog/2014/03/27/hello-octopress/">Hello Octopress</a></h2>
-	<div class="meta">
-		<div class="date">Mar 27</div>
-		<div class="tags">
+         else :
+         if li[s] !=n :
+         li[s]+=1
+
+         L+=[[l[k-1] for k in li[1:]]]
+
+         else : s-=1
+         return L
+         ```
+</code></pre></li>
+<li><p>再尝试一下表格，哈哈
+This|is|a|table
+这|是|一个|表格
+1:|:2|:3:|4</p></li>
+</ul>
 
 </div>
-	    
-	</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
+  
+
+
+<time datetime="2014-03-27T10:24:54+00:00" pubdate data-updated="true">Mar 27<span>th</span>, 2014</time></div>
+	<div class="tags">
+
+</div>
+	
+</div>
 </article>
+
+	<div class="share">
+	<div class="addthis_toolbox addthis_default_style ">
+		
+		
+		<a class="addthis_button_tweet"></a>
+		
+		
+		
+	</div>
 	
-	</section>
-	
+</div>
+
+
+
+<section id="comment">
+    <h2 class="title">Comments</h2>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+</section>
 </div>
 	<footer id="footer" class="inner">Copyright &copy; 2014
 
@@ -117,7 +177,10 @@
       var disqus_shortname = 'mercuriallee';
       
         
-        var disqus_script = 'count.js';
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://mercuriallee.github.io/blog/2014/03/27/hello-octopress/';
+        var disqus_url = 'http://mercuriallee.github.io/blog/2014/03/27/hello-octopress/';
+        var disqus_script = 'embed.js';
       
     (function () {
       var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
