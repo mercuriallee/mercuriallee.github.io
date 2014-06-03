@@ -1,24 +1,128 @@
-<?xml version="1.0" encoding="utf-8"?>
-<feed xmlns="http://www.w3.org/2005/Atom">
 
-  <title><![CDATA[Code is Rune]]></title>
-  <link href="http://mercuriallee.github.io/atom.xml" rel="self"/>
-  <link href="http://mercuriallee.github.io/"/>
-  <updated>2014-06-03T14:44:34+08:00</updated>
-  <id>http://mercuriallee.github.io/</id>
-  <author>
-    <name><![CDATA[Mercurial Lee]]></name>
+<!DOCTYPE HTML>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>PHP文件加密(3DES) - Code is Rune</title>
+	<meta name="author" content="Mercurial Lee">
+
+	
+	<meta name="description" content="这种文件加密算法基于PHP的encrypt模块 1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44 &hellip;">
+	
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+	<link href="/atom.xml" rel="alternate" title="Code is Rune" type="application/atom+xml">
+	<link rel="canonical" href="">
+	<link href="/favicon.png" rel="shortcut icon">
+	<link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+	<!--[if lt IE 9]><script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+	<script async="true" src="//ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+	
+</head>
+
+
+<body>
+	<header id="header" class="inner"><h1><a href="/">Code is Rune</a></h1>
+<nav id="main-nav"><ul class="main">
+	<li><a href="/">Blog</a></li>
+	<li><a href="/blog/archives">Archives</a></li>
+</ul>
+</nav>
+<nav id="mobile-nav">
+	<div class="alignleft menu">
+		<a class="button">Menu</a>
+		<div class="container"><ul class="main">
+	<li><a href="/">Blog</a></li>
+	<li><a href="/blog/archives">Archives</a></li>
+</ul>
+</div>
+	</div>
+	<div class="alignright search">
+		<a class="button"></a>
+		<div class="container">
+			<form action="https://www.google.com/search" method="get">
+				<input type="text" name="q" results="0">
+				<input type="hidden" name="q" value="site:mercuriallee.github.io">
+			</form>
+		</div>
+	</div>
+</nav>
+<nav id="sub-nav" class="alignright">
+	<div class="social">
+		
+		
+		<a class="google" href="https://plus.google.com/102307487203533855305?rel=author" title="Google+">Google+</a>
+		
+		
+		<a class="twitter" href="http://twitter.com/mercuriallee" title="Twitter">Twitter</a>
+		
+		
     
-  </author>
-  <generator uri="http://octopress.org/">Octopress</generator>
+		
+		
+		
+		
+		
+		<a class="rss" href="/atom.xml" title="RSS">RSS</a>
+		
+    
+	</div>
+	<form class="search" action="https://www.google.com/search" method="get">
+		<input class="alignright" type="text" name="q" results="0">
+		<input type="hidden" name="q" value="site:mercuriallee.github.io">
+	</form>
+</nav>
 
-  
-  <entry>
-    <title type="html"><![CDATA[PHP文件加密(3DES)]]></title>
-    <link href="http://mercuriallee.github.io/blog/2014/06/03/phpwen-jian-jia-mi-3des/"/>
-    <updated>2014-06-03T14:15:00+08:00</updated>
-    <id>http://mercuriallee.github.io/blog/2014/06/03/phpwen-jian-jia-mi-3des</id>
-    <content type="html"><![CDATA[<ul>
+</header>
+	
+		
+	
+	<div id="content" class="inner"><article class="post">
+	<h2 class="title">PHP文件加密(3DES)</h2>
+	<div class="entry-content"><ul>
 <li>这种文件加密算法基于PHP的<code>encrypt</code>模块</li>
 </ul>
 
@@ -221,106 +325,83 @@
 <li><p><code>decrypt函数只能支持到6144长度</code>的字符串加密,故虽然<code>fread()最大支持读取8192字节</code>,也不可一次读取8192字节进行加密,再基于以上规则,encrypt和decrypt一次性处理的包大小比例应为9:16,所以文中采用的一次性处理长度为encrypt 1152, decrypt 2048.其中2048/1152=16/9.</p></li>
 </ul>
 
-]]></content>
-  </entry>
+</div>
+
+
+<div class="meta">
+	<div class="date">
+
+
+
+
+
+
+
+
   
-  <entry>
-    <title type="html"><![CDATA[Hello Octopress]]></title>
-    <link href="http://mercuriallee.github.io/blog/2014/03/27/hello-octopress/"/>
-    <updated>2014-03-27T18:24:54+08:00</updated>
-    <id>http://mercuriallee.github.io/blog/2014/03/27/hello-octopress</id>
-    <content type="html"><![CDATA[<ul>
-<li>为什么我们总是喜欢以<code>hello world</code>这种形式来表达第一次做什么什么？我实在答不上来，我本来想好好写第一篇博文的，结果disqus那边搭建貌似需要加载一次评论的那块div，而且该死的是octopress不像别的博客平台都会自己先来一篇示例，所以只能凑合着来篇hello world，顺便粘点python代码吧，就粘个组合数的回溯法实现吧！</li>
-</ul>
 
 
-<!--more-->
+<time datetime="2014-06-03T14:15:00+08:00" pubdate data-updated="true">Jun 3<span>rd</span>, 2014</time></div>
+	<div class="tags">
+
+</div>
+	
+</div>
+</article>
+
+	<div class="share">
+	<div class="addthis_toolbox addthis_default_style ">
+		
+		
+		<a class="addthis_button_tweet"></a>
+		
+		
+		
+	</div>
+	
+</div>
 
 
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-</pre></td><td class='code'><pre><code class='python'><span class='line'><span class="k">def</span> <span class="nf">C</span><span class="p">(</span><span class="n">l</span><span class="p">,</span><span class="n">m</span><span class="p">):</span>
-</span><span class='line'>    <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">l</span><span class="p">)</span><span class="o">==</span><span class="nb">type</span><span class="p">([]):</span>
-</span><span class='line'>        <span class="n">n</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">l</span><span class="p">)</span>
-</span><span class='line'>    <span class="k">elif</span> <span class="nb">type</span><span class="p">(</span><span class="n">l</span><span class="p">)</span><span class="o">==</span><span class="nb">type</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="p">:</span> <span class="n">n</span><span class="o">=</span><span class="n">l</span><span class="p">;</span><span class="n">l</span><span class="o">=</span><span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">n</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
-</span><span class='line'>    <span class="k">else</span> <span class="p">:</span> <span class="k">raise</span> <span class="ne">TypeError</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="n">i</span><span class="o">=</span><span class="mi">1</span><span class="p">;</span><span class="n">s</span><span class="o">=</span><span class="mi">2</span><span class="p">;</span><span class="n">li</span><span class="o">=</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="p">(</span><span class="n">m</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
-</span><span class='line'>    <span class="n">L</span><span class="o">=</span><span class="p">[]</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="k">while</span> <span class="n">s</span><span class="o">!=</span><span class="mi">0</span><span class="p">:</span>
-</span><span class='line'>        <span class="k">if</span> <span class="n">s</span><span class="o">!=</span><span class="n">m</span> <span class="p">:</span>
-</span><span class='line'>           <span class="k">if</span> <span class="n">li</span><span class="p">[</span><span class="n">s</span><span class="p">]</span> <span class="o">!=</span> <span class="n">n</span><span class="o">+</span><span class="n">s</span><span class="o">-</span><span class="n">m</span> <span class="p">:</span>
-</span><span class='line'>               <span class="n">li</span><span class="p">[</span><span class="n">s</span><span class="p">]</span><span class="o">+=</span><span class="mi">1</span>
-</span><span class='line'>               <span class="n">li</span><span class="p">[</span><span class="n">s</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span><span class="o">=</span><span class="n">li</span><span class="p">[</span><span class="n">s</span><span class="p">]</span>
-</span><span class='line'>               <span class="n">s</span><span class="o">+=</span><span class="mi">1</span>
-</span><span class='line'>           <span class="k">else</span> <span class="p">:</span> <span class="n">s</span><span class="o">-=</span><span class="mi">1</span>
-</span><span class='line'>
-</span><span class='line'>        <span class="k">else</span> <span class="p">:</span>
-</span><span class='line'>           <span class="k">if</span> <span class="n">li</span><span class="p">[</span><span class="n">s</span><span class="p">]</span> <span class="o">!=</span><span class="n">n</span> <span class="p">:</span>
-</span><span class='line'>               <span class="n">li</span><span class="p">[</span><span class="n">s</span><span class="p">]</span><span class="o">+=</span><span class="mi">1</span>
-</span><span class='line'>
-</span><span class='line'>               <span class="n">L</span><span class="o">+=</span><span class="p">[[</span><span class="n">l</span><span class="p">[</span><span class="n">k</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">li</span><span class="p">[</span><span class="mi">1</span><span class="p">:]]]</span>
-</span><span class='line'>
-</span><span class='line'>           <span class="k">else</span> <span class="p">:</span> <span class="n">s</span><span class="o">-=</span><span class="mi">1</span>
-</span><span class='line'>    <span class="k">return</span> <span class="n">L</span>
-</span></code></pre></td></tr></table></div></figure>
+
+<section id="comment">
+    <h2 class="title">Comments</h2>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+</section>
+</div>
+	<footer id="footer" class="inner">Copyright &copy; 2014
+
+    Mercurial Lee
+
+</footer>
+	<script src="/javascripts/slash.js"></script>
+<script src="/javascripts/jquery.fancybox.pack.js"></script>
+<script type="text/javascript">
+(function($){
+	$('.fancybox').fancybox();
+})(jQuery);
+</script> <!-- Delete or comment this line to disable Fancybox -->
 
 
-<ul>
-<li>再尝试一下表格，哈哈</li>
-</ul>
+<script type="text/javascript">
+      var disqus_shortname = 'mercuriallee';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://mercuriallee.github.io/blog/2014/06/03/phpwen-jian-jia-mi-3des/';
+        var disqus_url = 'http://mercuriallee.github.io/blog/2014/06/03/phpwen-jian-jia-mi-3des/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = '//go.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
 
 
-<table>
-<thead>
-<tr>
-<th>This</th>
-<th>is</th>
-<th>a</th>
-<th>table</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>这</td>
-<td>是</td>
-<td>一个</td>
-<td>表格</td>
-</tr>
-<tr>
-<td>1:</td>
-<td>:2</td>
-<td>:3:</td>
-<td>4</td>
-</tr>
-</tbody>
-</table>
 
-]]></content>
-  </entry>
-  
-</feed>
+
+
+</body>
+</html>
