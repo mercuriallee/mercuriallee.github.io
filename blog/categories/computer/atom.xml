@@ -4,7 +4,7 @@
   <title><![CDATA[Category: computer | Code is Rune]]></title>
   <link href="http://mercuriallee.github.io/blog/categories/computer/atom.xml" rel="self"/>
   <link href="http://mercuriallee.github.io/"/>
-  <updated>2015-01-20T09:30:03+08:00</updated>
+  <updated>2015-01-21T10:58:37+08:00</updated>
   <id>http://mercuriallee.github.io/</id>
   <author>
     <name><![CDATA[Mercurial Lee]]></name>
@@ -180,24 +180,24 @@ function decrypt($decrypt,$key){
 <table>
 <thead>
 <tr>
-<th>This</th>
-<th>is</th>
-<th>a</th>
-<th>table</th>
+<th style="text-align:right;">This</th>
+<th style="text-align:right;">is</th>
+<th style="text-align:left;">a</th>
+<th style="text-align:left;">table</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>这</td>
-<td>是</td>
-<td>一个</td>
-<td>表格</td>
+<td style="text-align:right;">这</td>
+<td style="text-align:right;">是</td>
+<td style="text-align:left;">一个</td>
+<td style="text-align:left;">表格</td>
 </tr>
 <tr>
-<td>1:</td>
-<td>:2</td>
-<td>:3:</td>
-<td>4</td>
+<td style="text-align:right;">1</td>
+<td style="text-align:right;">2</td>
+<td style="text-align:left;">3</td>
+<td style="text-align:left;">4</td>
 </tr>
 </tbody>
 </table>
