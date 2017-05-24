@@ -1,0 +1,208 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: computer | Code is Rune]]></title>
+  <link href="http://mercuriallee.github.io/blog/categories/computer/atom.xml" rel="self"/>
+  <link href="http://mercuriallee.github.io/"/>
+  <updated>2017-05-24T16:59:41+08:00</updated>
+  <id>http://mercuriallee.github.io/</id>
+  <author>
+    <name><![CDATA[Mercurial Lee]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[PHP文件加密(3DES)]]></title>
+    <link href="http://mercuriallee.github.io/blog/2014/06/03/phpwen-jian-jia-mi-3des/"/>
+    <updated>2014-06-03T14:15:00+08:00</updated>
+    <id>http://mercuriallee.github.io/blog/2014/06/03/phpwen-jian-jia-mi-3des</id>
+    <content type="html"><![CDATA[<ul>
+<li>这种文件加密算法基于PHP的<code>encrypt</code>模块</li>
+</ul>
+
+
+<!--more-->
+
+
+<pre><code class="php">
+function encrypt_file($file_location,$destination){
+
+    $source_file=fopen($file_location,'r');
+    $destination_file=fopen($destination,'a');
+
+    $key=createSecret(24);  //triple DES是24字节密钥,DES是8字节,密钥是16进制数构成
+    $_REQUEST['des_key']=$key;
+
+    while(!feof($source_file)){
+        $package=fread($source_file,1152);
+
+        $package=self::encrypt($package,$key);
+
+        if(!fwrite($destination_file,$package)){
+            return false;
+        }
+    }
+
+    fclose($source_file);
+    fclose($destination);
+
+    return true;
+}
+
+
+function encrypt($encrypt,$key){
+
+    $encrypt=base64_encode($encrypt);
+
+    $iv = mcrypt_create_iv(mcrypt_get_iv_size(MCRYPT_3DES,MCRYPT_MODE_ECB),MCRYPT_RAND);
+    $passcrypt = mcrypt_encrypt(MCRYPT_3DES ,$key, $encrypt, MCRYPT_MODE_ECB, $iv);
+
+    $encode = base64_encode($passcrypt);
+
+    return $encode;
+}
+
+
+function createSecret($secretLength = 16)
+{
+    $validChars = array(
+        '0', '1', '2', '3', '4', '5', '6', '7',
+        '8', '9', 'A', 'B', 'C', 'D', 'E', 'F', 
+        '='  
+    );
+
+    unset($validChars[16]);
+
+    $secret = '';
+    for ($i = 0; $i &lt; $secretLength; $i++) {
+        $secret .= $validChars[array_rand($validChars)];
+    }
+
+    return $secret;
+}
+
+
+function decrypt_file($file_location,$key){
+
+    $tmp_file_location='/tmp/'.base64_encode(create_uuid());
+
+    $tmp_file=fopen($tmp_file_location,'a');
+    $source_file=fopen($file_location,'r');
+
+    while(!feof($source_file)){
+        $package=fread($source_file,2048);
+
+        $package_decrypted=decrypt($package,$key);
+
+        if(!fwrite($tmp_file,$package_decrypted)){
+            return false;
+        }
+    }
+
+    fclose($tmp_file);
+    fclose($source_file);
+
+    return $tmp_file_location;
+}
+
+
+function decrypt($decrypt,$key){  
+
+    $decoded = base64_decode($decrypt);
+
+    $iv = mcrypt_create_iv(mcrypt_get_iv_size(MCRYPT_3DES,MCRYPT_MODE_ECB),MCRYPT_RAND);
+    $decrypted = mcrypt_decrypt(MCRYPT_3DES ,$key, $decoded, MCRYPT_MODE_ECB, $iv);
+
+    $decrypted = base64_decode($decrypted);
+
+    return $decrypted;
+}
+</code></pre>
+
+<h4>代码关键</h4>
+
+<ul>
+<li><p>DES密钥是8字节的16进制数,3DES是24字节,不严格遵循密钥规则会导致非文本格式文件无法成功解密</p></li>
+<li><p><code>base64_encode导致的密文明文长度比为4:3</code>,而由于encrypt对特殊字符支持不太好,应先进行base64_encode然后再进行加密,加密完后再进行base64_encode后写入文件,如此,<code>密文明文长度比为16:9</code></p></li>
+<li><p><code>decrypt函数只能支持到6144长度</code>的字符串加密,故虽然<code>fread()最大支持读取8192字节</code>,也不可一次读取8192字节进行加密,再基于以上规则,encrypt和decrypt一次性处理的包大小比例应为9:16,所以文中采用的一次性处理长度为encrypt 1152, decrypt 2048.其中2048/1152=16/9.</p></li>
+</ul>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Hello Octopress]]></title>
+    <link href="http://mercuriallee.github.io/blog/2014/03/27/hello-octopress/"/>
+    <updated>2014-03-27T10:24:54+00:00</updated>
+    <id>http://mercuriallee.github.io/blog/2014/03/27/hello-octopress</id>
+    <content type="html"><![CDATA[<ul>
+<li>为什么我们总是喜欢以<code>hello world</code>这种形式来表达第一次做什么什么？我实在答不上来，我本来想好好写第一篇博文的，结果disqus那边搭建貌似需要加载一次评论的那块div，而且该死的是octopress不像别的博客平台都会自己先来一篇示例，所以只能凑合着来篇hello world，顺便粘点python代码吧，就粘个组合数的回溯法实现吧！</li>
+</ul>
+
+
+<!--more-->
+
+
+<pre><code class="python">def C(l,m):
+    if type(l)==type([]):
+        n=len(l)
+    elif type(l)==type(0) : n=l;l=range(1,n+1)
+    else : raise TypeError
+
+    i=1;s=2;li=[1]*(m+1)
+    L=[]
+
+    while s!=0:
+        if s!=m :
+           if li[s] != n+s-m :
+               li[s]+=1
+               li[s+1]=li[s]
+               s+=1
+           else : s-=1
+
+        else :
+           if li[s] !=n :
+               li[s]+=1
+
+               L+=[[l[k-1] for k in li[1:]]]
+
+           else : s-=1
+    return L
+</code></pre>
+
+<ul>
+<li>再尝试一下表格，哈哈</li>
+</ul>
+
+
+<table>
+<thead>
+<tr>
+<th style="text-align:right;">This</th>
+<th style="text-align:right;">is</th>
+<th style="text-align:left;">a</th>
+<th style="text-align:left;">table</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:right;">这</td>
+<td style="text-align:right;">是</td>
+<td style="text-align:left;">一个</td>
+<td style="text-align:left;">表格</td>
+</tr>
+<tr>
+<td style="text-align:right;">1</td>
+<td style="text-align:right;">2</td>
+<td style="text-align:left;">3</td>
+<td style="text-align:left;">4</td>
+</tr>
+</tbody>
+</table>
+
+]]></content>
+  </entry>
+  
+</feed>
