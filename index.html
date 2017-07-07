@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<!--<meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>-->
+<html>
+	<head>
+	</head>
+	<body>
+		<script type='text/javascript' src='./Lint.js'> </script>
+		<script src="./Base.js"> </script>
+
+		<script>
+			let dict = {a: null, b: null};
+			let submit = function() {
+				let start = +new Date;
+				let res = C(dict.a, dict.b).toString();
+				let end = +new Date;
+				let node = document.getElementsByName('result')[0];
+				let cost = document.getElementById('cost');
+				node.innerText = res;
+				cost.innerText = `${end-start}ms`;
+			}
+			
+			let A = function(n, m) {
+				return range(n-m+1,n).reduce((s,e)=>s.mul(Lint(e)), Lint(1));
+			}
+
+			let C = function(n, m) {
+				if(m > n/2) {
+					return C(n, n-m);
+				}
+				return A(n,m).div(A(m,m));
+			}
+		</script>
+		<br/>
+		<label>n: </label><input name="mul1" onchange="dict.a=parseInt(this.value);"></input>
+		<br/>
+		<br/>
+		<label>m: </label><input name="mul2" onchange="dict.b=parseInt(this.value);"></input>
+		<br/>
+		<br/>
+		<button onclick="submit();"> submit </button>
+		<br/>
+		<br/>
+		<label>Result: </label><h name="result">null</h>
+		<br/>
+		<label>Cost: </label><h id="cost">null</h>
+	</body>
+</html>
