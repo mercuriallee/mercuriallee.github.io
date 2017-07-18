@@ -1,6 +1,6 @@
 const Lint = require('./Lint.js').Lint;
 
-_ULfloat = function(str, llen) {
+const _ULfloat = function(str, llen) {
 	this.str = str;
 	this.llen = llen;
 }
@@ -144,7 +144,6 @@ _ULfloat.prototype.mul = function(o) {
 	return res_lfloat.lshift(-rlen1-rlen2).clean_zeros(false);
 }
 
-//most difficult part.
 _ULfloat.prototype.div = function(o, precision=16) {
 	const llen1 = this.llen;
 	const rlen2 = o.str.length - o.llen;
@@ -152,10 +151,107 @@ _ULfloat.prototype.div = function(o, precision=16) {
 	const lint1 = new Lint(this.lshift(max).str.substr(0,llen1+max));
 	const lint2 = new Lint(o.str);
 	const res_lint = lint1.div(lint2);
-	const res_lfloat = new _ULfloat(res_lint.str, res_lint.str.length-precision);
+	const res_lfloat = new _ULfloat(res_lint.str, res_lint.str.length).lshift(-precision);
 	return res_lfloat;
 }
 
+const Lfloat = function(data, sign) {
+	'use strict';
+	if(this === undefined) {
+		return new Lfloat(data, sign);
+	}
+	const type = typeof(data);
+	if(data === undefined) {
+		this.sign = 1;
+		this._ulfloat = new _ULfloat('0', 1);
+	}
+	else if(type === 'number') {
+		this.sign = data < 0;
+		let str = this.sign ? data.toString().substr(1) : data.toString();
+		this._ulfloat = new _ULfloat(str.replace('.', ''), str.concat('.').indexOf('.'));
+	} else if(type === 'string') {
+		if(data.length === 0) {
+			return new Lfloat;
+		}
+		const matches = data.match(/^(-?)0*(\d+)\.?(\d*?)0*$/);
+		if(matches === null) {
+			throw new Error("Only numbers, a dot and maybe a dash can include in the String of Lfloat-Initialization.");
+		}else {
+			this.sign = matches[1].length != 0;
+			this._ulfloat = new _ULfloat(matches[2]+matches[3], matches[2].length);
+		}	
+	}else if(type === 'object' && data instanceof _ULfloat) {
+		this.sign = !!sign;
+		this._ulfloat = data;
+	}else {
+		throw new Error("Parameters to Lfloat-Initialize can only be number or string.");
+	}
+
+	if(this._ulfloat.str === '0' && this.sign) {
+		this.sign = 0;
+	}
+
+}
+
+Lfloat.prototype.toString = function() {
+	return (this.sign ? '-' : '').concat(this._ulfloat.toString());
+}
+
+Lfloat.prototype.add = function(o) {
+	const type = typeof(o);
+	if(type === 'object' && o instanceof Lfloat) {
+		if(this.sign === o.sign) {
+			const res_ufloat = this._ulfloat.add(o._ulfloat);
+			return new Lfloat(res_ufloat, this.sign);
+		} else {
+			const res_ufloat = this._ulfloat.diff(o._ulfloat);
+			return (this._ulfloat.compare(o._ulfloat) === -1 ? this : o).sign ? new Lfloat(res_ufloat, 0) : new Lfloat(res_ufloat, 1);
+		}
+	}
+	else if(type === 'number' || type === 'string') {
+		return this.add(new Lfloat(o));
+	} else {
+		throw new Error("Lfloat can only add a Lfloat, number, or a Lfloat-convertable string.");
+	}
+}
+
+Lfloat.prototype.negation = function() {
+	return new Lfloat(this._ulfloat, !this.sign);
+}
+
+Lfloat.prototype.minus = function(o) {
+	return this.add(o.negation());
+}
+
+Lfloat.prototype.mul = function(o) {
+	const type = typeof(o);
+	if(type === 'object' && o instanceof Lfloat) {
+		const res_ufloat = this._ulfloat.mul(o._ulfloat);
+		return new Lfloat(res_ufloat, !(this.sign === o.sign));
+	}
+	else if(type === 'number' || type === 'string') {
+		return this.mul(new Lfloat(o));
+	} else {
+		throw new Error("Lfloat can only add a Lfloat, number, or a Lfloat-convertable string.");
+	}
+}
+
+Lfloat.prototype.div = function(o, precision=16) {
+	const type = typeof(o);
+	if(type === 'object' && o instanceof Lfloat) {
+		if(o.str === '0') {
+			return Infinity;
+		}
+		const res_ufloat = this._ulfloat.div(o._ulfloat, precision);
+		return new Lfloat(res_ufloat, !(this.sign === o.sign));
+	}
+	else if(type === 'number' || type === 'string') {
+		return this.div(new Lfloat(o));
+	} else {
+		throw new Error("Lfloat can only add a Lfloat, number, or a Lfloat-convertable string.");
+	}
+}
+
 module.exports = {
-	_ULfloat : _ULfloat
+	Lfloat : Lfloat
 }
