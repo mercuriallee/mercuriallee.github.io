@@ -1,4 +1,6 @@
-const Lint = require('./Lint.js').Lint;
+if(this.window === undefined) {
+	global.Lint = require('./Lint.js').Lint;
+} 
 
 const _ULfloat = function(str, llen) {
 	this.str = str;
@@ -8,6 +10,9 @@ const _ULfloat = function(str, llen) {
 _ULfloat.prototype.toString = function() {
 	let str = this.str;
 	str = str.substr(0,this.llen)+'.'+str.substr(this.llen)
+	if(str[str.length-1] === '.') {
+		return str.slice(0,-1);
+	}
 	return str;
 }
 
@@ -251,6 +256,53 @@ Lfloat.prototype.div = function(o, precision=16) {
 		throw new Error("Lfloat can only add a Lfloat, number, or a Lfloat-convertable string.");
 	}
 }
+
+Object.defineProperty(Lfloat.prototype, 'to_i', {get: function() {
+	return (this.sign?'-':'') + this._ulfloat.str.substr(0,this._ulfloat.llen);
+}});
+
+function fraction(lfloat1, lfloat2) {
+	const rlen1 = lfloat1._ulfloat.str.length - lfloat1._ulfloat.llen;
+	const rlen2 = lfloat2._ulfloat.str.length - lfloat2._ulfloat.llen;
+	const max   = Math.max(rlen1, rlen2);
+
+	const sign = !(lfloat1.sign === lfloat2.sign);
+	let int1, int2;
+	let I1, I2;
+	if(lfloat1._ulfloat.compare(lfloat2._ulfloat) === -1) {
+		int1 = new Lint(lfloat2._ulfloat.lshift(max).str);
+		int2 = new Lint(lfloat1._ulfloat.lshift(max).str);
+		I1 = int2, I2 = int1;
+	} else {
+		int1 = new Lint(lfloat1._ulfloat.lshift(max).str);
+		int2 = new Lint(lfloat2._ulfloat.lshift(max).str);
+		I1 = int1, I2 = int2;
+	}
+	let mod = int1.mod(int2);
+	while(mod.str !== '0') {
+		int1 = int2;
+		int2 = mod;
+		mod = int1.mod(int2);
+	}
+	I1 = I1.div(int2);
+	I2 = I2.div(int2);
+	return [new Lfloat(new _ULfloat(I1.str, I1.str.length), lfloat1.sign),
+			new Lfloat(new _ULfloat(I2.str, I2.str.length), lfloat2.sign)];
+}
+
+const test_fraction =  function() {
+	for(let i=0; i<20; i++) {
+		const max = 9999;
+		const min = -9999;
+		const float1 = new Lfloat(Math.random() * (max - min) + min);
+		const float2 = new Lfloat(Math.random() * (max - min) + min);
+		const frac = fraction(float1, float2);
+		console.log(`float1: ${float1}, float2: ${float2}`);
+		console.log(`frac: ${frac.map(e=>e.toString())}`);
+		console.log(`frac0/frac1: ${frac[0].div(frac[1])}`, `float1/float2: ${float1.div(float2)}`);
+		console.log('\n\n');
+	}
+};
 
 module.exports = {
 	Lfloat : Lfloat

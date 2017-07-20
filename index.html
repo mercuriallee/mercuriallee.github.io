@@ -5,13 +5,14 @@
 	</head>
 	<body>
 		<script type='text/javascript' src='./Lint.js'> </script>
+		<script type='text/javascript' src='./Lfloat.js'> </script>
 		<script src="./Base.js"> </script>
 
 		<script>
 			let dict = {a: null, b: null};
 			let submit = function() {
 				let start = +new Date;
-				let res = C(dict.a, dict.b).toString();
+				let res = C(dict.a, dict.b).to_i.toString();
 				let end = +new Date;
 				let node = document.getElementsByName('result')[0];
 				let cost = document.getElementById('cost');
@@ -20,7 +21,7 @@
 			}
 			
 			let A = function(n, m) {
-				return range(n-m+1,n).reduce((s,e)=>s.mul(Lint(e)), Lint(1));
+				return range(n-m+1,n).reduce((s,e)=>s.mul(Lfloat(e)), Lfloat(1));
 			}
 
 			let C = function(n, m) {

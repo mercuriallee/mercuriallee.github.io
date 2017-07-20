@@ -283,15 +283,16 @@ function Lint(data) {
 		return new Lint(data);
 	}
 	if(typeof(data) === "string") {
-		if(/^(\d|_)*$/.test(data)) {
-			let str = data.replace(/_/g, '');
-			if(str === "") {
-				str = '0';
+		const matches = data.match(/^0*(\d+)$/);
+		if(matches === null) {
+			throw new Error("Lint must initilize with number-string.");
+		} else {
+			let str = "0";
+			if(matches[1].length) {
+				str = matches[1];
 			}
 			this.str = str;
 			this.bint = new Bint(dec2bin(str));
-		}else {
-			throw new Error("Lint must initilize with number-string.");
 		}
 	} else if(typeof(data) === "number"){
 		this.str = data.toString(10);
@@ -414,6 +415,10 @@ Lint.prototype.diff = function(o) {
 
 Lint.prototype.div = function(o) {
 	return new Lint(this.bint.div(o.bint));
+}
+
+Lint.prototype.mod = function(o) {
+	return new Lint(this.bint.mod(o.bint));
 }
 
 Lint.prototype.toString = function() {
