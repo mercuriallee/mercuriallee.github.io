@@ -251,7 +251,7 @@ Lfloat.prototype.div = function(o, precision=16) {
 		return new Lfloat(res_ufloat, !(this.sign === o.sign));
 	}
 	else if(type === 'number' || type === 'string') {
-		return this.div(new Lfloat(o));
+		return this.div(new Lfloat(o), precision);
 	} else {
 		throw new Error("Lfloat can only add a Lfloat, number, or a Lfloat-convertable string.");
 	}
