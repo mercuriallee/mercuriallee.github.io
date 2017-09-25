@@ -36,9 +36,20 @@ Fract.prototype.equal = function(o) {
 	return this.min(o).a === 0
 }
 
+Fract.from = function(o) {
+	if(typeof(o) === "number") {
+		let str = o.toString();
+		let dot_pos = str.indexOf('.');
+		let scale = 1;
+		if(dot_pos !== -1) {scale = Math.pow(10, str.length-dot_pos-1)}
+		return new Fract(o*scale, scale).reduction();
+	} else if(typeof(o) === "string") {
+		return Fract.from(parseFloat(o));
+	}
+}
+
 function equalTo24(a,b,c,d){
-	let result = equalTo(new Fract(24, 1), [new Fract(a, 1), new Fract(b, 1), new Fract(c, 1), new Fract(d, 1)],
-  [a+'', b+'', c+'', d+'']);
+	let result = equalTo(24, a, b, c, d);
   if(result) {
   	return result;
   }
@@ -48,11 +59,15 @@ function equalTo24(a,b,c,d){
 function result_with_operation(i, j, operation, str, list, strs, res) {
     let new_list = list.slice(0,i).concat(list.slice(i+1, j)).concat(list.slice(j+1)).concat(operation);
     let new_strs = strs.slice(0,i).concat(strs.slice(i+1, j)).concat(strs.slice(j+1)).concat(str);
-    let result = equalTo(res, new_list, new_strs);
+    let result = equalToRecursively(res, new_list, new_strs);
     return result;
 }
 
-function equalTo(res, list, strs) {
+function equalTo(res, ...list) {
+	return equalToRecursively(Fract.from(res), list.map(e=>Fract.from(e)), list.map(e=>e+''));
+}
+
+function equalToRecursively(res, list, strs) {
 	if(list.length === 1) {
   	return list[0].equal(res) ? strs[0] : false;
   }
