@@ -102,10 +102,18 @@ Skyscapers.solvePuzzle = (function(){
 
 		let matrix = [...Array(n*n)].map(_=>0);
 		let rewrite_times = [...Array(n*n)].map(_=>0);
-		let clue_index = 0, seen = 0, highest = 0, unit_index = 0, success = 0, reject_last = false;
+		let clue_index = 0, seen = 0, highest = 0, unit_index = 0, success = 0, was_rejected = false;
 		let history_data = [[0,0]];
 		let row_counts = [...Array(n)].map(_=>new Uint8Array(8));
 		let col_counts = [...Array(n)].map(_=>new Uint8Array(8));
+
+		let reject_back = function() {
+			unit_index -= 1;
+			was_rejected = true;
+			history_data.pop();
+			[seen, highest] = history_data[history_data.length-1] || [0, 0];
+		}
+
 		clue_loop: while(true) {
 			if(clue_index === clues_with_priority.length) {break;}
 			let cur_clue = clues_with_priority[clue_index];
@@ -116,10 +124,7 @@ Skyscapers.solvePuzzle = (function(){
 						break clue_loop;
 					}
 					if(seen != cur_clue.value) {
-						unit_index -= 1;
-						reject_last = true;
-						history_data.pop();
-						[seen, highest] = history_data[history_data.length-1];
+						reject_back();
 						continue unit_loop;
 					} else {
 						seen = 0, highest = 0;
@@ -141,20 +146,15 @@ Skyscapers.solvePuzzle = (function(){
 				}
 				let pos_of_matrix = cur_clue.poses[unit_index];
 				let height = matrix[pos_of_matrix];
-				rewrite_times[pos_of_matrix] = rewrite_times[pos_of_matrix] - reject_last;
+				rewrite_times[pos_of_matrix] = rewrite_times[pos_of_matrix] - was_rejected;
 				if(rewrite_times[pos_of_matrix]) {
-					if(reject_last) {
-						unit_index -= 1;
-						history_data.pop();
-						[seen, highest] = history_data[history_data.length-1] || [0,0];
+					if(was_rejected) {
+						reject_back();
 						continue unit_loop;
 					}
 					if(height > highest) {
 						if(cur_clue.value !== -1 && (seen+1 > cur_clue.value || (seen+n-unit_index)<cur_clue.value)) {
-							unit_index -= 1;
-							history_data.pop();
-							[seen, highest] = history_data[history_data.length-1];
-							reject_last = true;
+							reject_back();
 							continue unit_loop;
 						} else {
 							highest = height;
@@ -165,10 +165,7 @@ Skyscapers.solvePuzzle = (function(){
 					}
 					else {
 						if(cur_clue.value != -1 && (seen+n-1-unit_index)<cur_clue.value) {
-							unit_index -= 1;
-							history_data.pop();
-							[seen, highest] = history_data[history_data.length-1];
-							reject_last = true;
+							reject_back();
 							continue unit_loop;
 						}
 						history_data.push([seen,highest]);
@@ -176,21 +173,18 @@ Skyscapers.solvePuzzle = (function(){
 					}
 				} else {
 					let [row,col] = [parseInt(pos_of_matrix / n), pos_of_matrix % n];
-					if(reject_last) {
+					if(was_rejected) {
 						row_counts[row][height] -= 1;
 						col_counts[col][height] -= 1;
 					}
-					reject_last = false;
+					was_rejected = false;
 					//let exists = existsValues(pos_of_matrix, matrix, rewrite_times, n);
 					testValue: while(true) {
 						height = height + 1;
 						matrix[pos_of_matrix] = height;
 						if(height > n || height > n+1+unit_index-cur_clue.value) {
-							unit_index -= 1;
+							reject_back();
 							matrix[pos_of_matrix] = 0;
-							history_data.pop();
-							[seen, highest] = history_data[history_data.length-1] || [0, 0];
-							reject_last = true;
 							continue unit_loop;
 						}
 						if(row_counts[row][height] || col_counts[col][height]) {
