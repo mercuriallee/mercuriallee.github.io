@@ -1,6 +1,6 @@
-const Skyscapers = {};
+const Skyscrapers = {};
 
-Skyscapers.solvePuzzle = (function(){
+Skyscrapers.solvePuzzle = (function(){
 
 	const N = 7;
 
@@ -228,13 +228,13 @@ Skyscapers.solvePuzzle = (function(){
 	return solvePuzzle;
 })();
 
-Skyscapers.test = function() {
+Skyscrapers.test = function() {
 	let clues_7_0 = [7,0,0,0,2,2,3, 0,0,3,0,0,0,0, 3,0,3,0,0,5,0, 0,0,0,0,5,0,4];
 	let clues_7_1 = [0,2,3,0,2,0,0, 5,0,4,5,0,4,0, 0,4,2,0,0,0,6, 5,2,2,2,2,4,1];
 	let clues_7_2 = [0,2,3,0,2,0,0, 5,0,4,5,0,4,0, 0,4,2,0,0,0,6, 0,0,0,0,0,0,0];
 
 	function test() {
-		let solvePuzzle = Skyscapers.solvePuzzle;
+		let solvePuzzle = Skyscrapers.solvePuzzle;
 		return [
 			solvePuzzle(clues_7_0, 7),
 			solvePuzzle(clues_7_1, 7),
@@ -255,5 +255,5 @@ Skyscapers.test = function() {
 
 //If not running in browser. Other words, if run this script as Main script;
 if(!this.window)  {
-	Skyscapers.test();
+	Skyscrapers.test();
 }
