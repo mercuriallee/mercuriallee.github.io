@@ -425,6 +425,8 @@ Lint.prototype.toString = function() {
 	return this.str;
 }
 
-module.exports = {
-	Lint: Lint
+if(!this.window) {
+	module.exports = {
+		Lint: Lint
+	}
 }

@@ -1,4 +1,3 @@
-'use strict';
 function markov_E(start, end, p) {
 	if(p == 0.5) {
 		if(end < start) {return 0}
@@ -9,4 +8,6 @@ function markov_E(start, end, p) {
 	}
 }
 
-exports.markov_E = markov_E;
+if(!window) {
+	exports.markov_E = markov_E;
+}

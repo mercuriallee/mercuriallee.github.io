@@ -304,6 +304,8 @@ const test_fraction =  function() {
 	}
 };
 
-module.exports = {
-	Lfloat : Lfloat
+if(!this.window) {
+	module.exports = {
+		Lfloat : Lfloat
+	}
 }
