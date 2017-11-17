@@ -329,6 +329,10 @@ class BTree extends Tree {
 	}
 
 	appendData(data) {
+		if(data.equalTo && data.lessThan) {
+			this.append({data: data, color: BTreeNodeColor.Red});
+			return;
+		} 
 		if(ComparableTypes.includes(typeof data)) {
 			this.append({data: new ComparableClass(data), color: BTreeNodeColor.Red});
 		} else {
@@ -336,7 +340,7 @@ class BTree extends Tree {
 		}
 	}
 
-	remove(data) {
+	removeData(data) {
 		if(ComparableTypes.includes(typeof data)) {
 			data = new ComparableClass(data);
 		}
