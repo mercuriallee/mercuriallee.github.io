@@ -330,11 +330,11 @@ class BTree extends Tree {
 
 	appendData(data) {
 		if(data.equalTo && data.lessThan) {
-			this.append({data: data, color: BTreeNodeColor.Red});
+			this.append(new BTreeNode(data));
 			return;
 		} 
 		if(ComparableTypes.includes(typeof data)) {
-			this.append({data: new ComparableClass(data), color: BTreeNodeColor.Red});
+			this.append(new BTreeNode(ComparableClass(data)));
 		} else {
 			throw "Can only append comparable data.";
 		}
@@ -388,11 +388,8 @@ class BTree extends Tree {
 				break removeLoop;
 			}
 			//remove node with a child
-			if (node.color = BTreeNodeColor.Black) {
-			  rootNeedABlack = node.left;
-			  if (rootNeedABlack == null ) {
-			    rootNeedABlack = node.right;
-			  }
+			if (node.color == BTreeNodeColor.Black) {
+			  rootNeedABlack = node.left || node.right;
 			}
 			if (node.left != nil) {
 				this.changeCurrentNode(node, node.left);
@@ -444,15 +441,14 @@ class BTree extends Tree {
               const sameSideChild = (brother == parent.left ? brother.left : brother.right);
               if (sameSideChild == null) {
                   brother.color = BTreeNodeColor.Red;
-                  let notNilChild = brother.left;
-                  if (notNilChild == null) {
-                    notNilChild = brother.right;
-                  }
-                  notNilChild.color = BTreeNodeColor.Black;
+                  (brother.left || brother.right).color = BTreeNodeColor.Black;
                   this.rotate(brother, brother.left != null);
 				  this.requireABlack(node);
                   break EPL;
               }
+			  if(!(sameSideChild && sameSideChild.color == BTreeNodeColor.Red)) {
+				  throw new Error("Fatal Error.");
+			  }
                 
               parent.color = BTreeNodeColor.Black;
               brother.color = BTreeNodeColor.Red;
@@ -472,6 +468,7 @@ class BTree extends Tree {
               brother.color = BTreeNodeColor.Black;
               parent.color = BTreeNodeColor.Red;
               this.rotate(parent, brother == parent.left);
+			  this.requireABlack(node);
               break EPL;
           }
           // parent black, brother black
@@ -485,8 +482,7 @@ class BTree extends Tree {
 		   * the other child is nil or black
 		   * [parent black, brother black]
 		   */
-		  const sameSideChild = brother == parent.left ? brother.left : brother.right;
-		  const diffSideChild = brother == parent.left ? brother.right : brother.left;
+		  const [sameSideChild, diffSideChild] = brother === parent.left ? [brother.left, brother.right] : [brother.right, brother.left];
 		  /*
 		   * PHASE 1:
 		   * 1. change Diff-Side child to BLACK.
@@ -496,7 +492,7 @@ class BTree extends Tree {
 		   * 1. change brother(Diff-Side's red child) to Black.
 		   * 2. ROTATE to make Diff-Side to be node(which require a black)'s parent.
 		   */
-		  if (diffSideChild != nil && diffSideChild.color == BTreeNodeColor.Red) {
+		  if (diffSideChild && diffSideChild.color == BTreeNodeColor.Red) {
 			  diffSideChild.color = BTreeNodeColor.Black;
 			  this.rotate(brother, diffSideChild == brother.left);
 			  this.rotate(parent, parent.right == node);
