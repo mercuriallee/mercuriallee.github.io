@@ -294,7 +294,7 @@ class BTree extends Tree {
 		let parent;
 		locateLoop: while(1) {
 			if(node.data.equalTo(current.data)) {
-      	this.delegate.appendRepeated(current);
+			this.delegate.appendRepeated(current);
 				return current;
 			}
 			if (node.data.lessThan(current.data)) {
@@ -348,7 +348,7 @@ class BTree extends Tree {
 		if (node == nil) {
 			return false;
 		}
-		this.removeNode(node);
+		return this.removeNode(node);
 	}
 	
 	removeNode(node) {
