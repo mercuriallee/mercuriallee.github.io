@@ -4,6 +4,7 @@
 	<head>
 	</head>
 	<body>
+		<script src="http://twemoji.maxcdn.com/2/twemoji.min.js?2.4"></script>
 		<script src="./base.js"> </script>
 		<script src="./solve.js"> </script>
 		<script>
@@ -11,12 +12,12 @@
 				let str = document.querySelector('#mahjong_str').value;
 				try {
 					let seq = MahjongFactory.sequenceBy(str);
-					document.querySelector('#handDeck').innerHTML = seq.map(e=>e.toEmoji()).join(' ');
+					document.querySelector('#handDeck').innerHTML = twemoji.parse(seq.map(e=>e.toEmoji()).join(' '));
 					let start = +new Date;
 					let solution = waitingMahjong(seq);
 					let end = Date.now();
 					let emoji_str = solution.map(e=>e.toEmoji()).join(' ');
-					document.querySelector('#result').innerHTML = emoji_str;
+					document.querySelector('#result').innerHTML = twemoji.parse(emoji_str);
 					document.querySelector('#cost').innerHTML = end-start+'ms';
 				} catch(err) {
 					window.alert(err);
