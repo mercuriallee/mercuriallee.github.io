@@ -8,16 +8,21 @@
 		<script src="./base.js"> </script>
 		<script src="./solve.js"> </script>
 		<script>
+			function fitWidth() {
+				return Math.min(Math.min(window.innerWidth, window.innerHeight) / 4000 * 300 | 0, 150);
+			}
+			function imgTagFor(mahjong) {
+				return `<img width=${fitWidth()} srcset='${mahjong.imageUrl} 2x'></img>`;
+			}
 			function solveStr() {
 				let str = document.querySelector('#mahjong_str').value;
 				try {
 					let seq = MahjongFactory.sequenceBy(str);
-					document.querySelector('#handDeck').innerHTML = twemoji.parse(seq.map(e=>e.toEmoji()).join(' '));
+					document.querySelector('#handDeck').innerHTML = seq.map(imgTagFor).join('');
 					let start = +new Date;
 					let solution = waitingMahjong(seq);
 					let end = Date.now();
-					let emoji_str = solution.map(e=>e.toEmoji()).join(' ');
-					document.querySelector('#result').innerHTML = twemoji.parse(emoji_str);
+					document.querySelector('#result').innerHTML = solution.map(imgTagFor).join('&nbsp');
 					document.querySelector('#cost').innerHTML = end-start+'ms';
 				} catch(err) {
 					window.alert(err);
@@ -31,12 +36,12 @@
 		<button onclick="solveStr();"> submit </button>
 		<br/>
 		<br/>
-		<label>Hand Deck: </label><h><font size='50' id='handDeck'>null</font></h>
+		<label>Hand Deck: </label><h id='handDeck'>null</h>
 		<br/>
 		<br/>
 		<br/>
 		<br/>
-		<label>Win Draws: </label><h><font size='50' id='result'>null</font></h>
+		<label>Win Draws: </label><h id='result'>null</h>
 		<br/>
 		<br/>
 		<br/>

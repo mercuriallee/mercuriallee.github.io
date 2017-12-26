@@ -64,6 +64,18 @@ Mahjong.prototype.toEmoji = function() {
 	debugger;
 }
 
+Object.defineProperty(Mahjong.prototype, 'imageUrl', {
+	get:function(){
+		let postfix = '';
+		if(this.style==3) {
+			postfix = [ , 'dong', 'nan', 'xi', 'bei', 'zhong', 'fa', 'bai'][this.num];
+		} else {
+			postfix = ''+this.num+['tong', 'suo', 'wan'][this.style];
+		}
+		return './assets/F'+postfix+'.png';
+	}
+});
+
 const MahjongFactory = function() {
 }
 
