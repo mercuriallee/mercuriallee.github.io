@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
+<html>
+	<head>
+	</head>
+	<body>
+		<script src="./base.js"> </script>
+		<script src="./solve.js"> </script>
+		<script>
+			function solveStr() {
+				let str = document.querySelector('#mahjong_str').value;
+				try {
+					let seq = MahjongFactory.sequenceBy(str);
+					document.querySelector('#handDeck').innerHTML = seq.map(e=>e.toEmoji()).join(' ');
+					let start = +new Date;
+					let solution = waitingMahjong(seq);
+					let end = Date.now();
+					let emoji_str = solution.map(e=>e.toEmoji()).join(' ');
+					document.querySelector('#result').innerHTML = emoji_str;
+					document.querySelector('#cost').innerHTML = end-start+'ms';
+				} catch(err) {
+					window.alert(err);
+				}
+			}
+		</script>
+		<br/>
+		<label>Mahjong Sequence String: </label><input id="mahjong_str"></input>
+		<br/>
+		<br/>
+		<button onclick="solveStr();"> submit </button>
+		<br/>
+		<br/>
+		<label>Hand Deck: </label><h><font size='50' id='handDeck'>null</font></h>
+		<br/>
+		<br/>
+		<br/>
+		<br/>
+		<label>Win Draws: </label><h><font size='50' id='result'>null</font></h>
+		<br/>
+		<br/>
+		<br/>
+		<br/>
+		<label>Cost: </label><h id="cost">null</h>
+		<br/>
+		<br/>
+	</body>
+</html>
