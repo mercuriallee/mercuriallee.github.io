@@ -176,8 +176,11 @@ function waitingMahjong(handDeck) {
  */
 function mahjongs2dict(mahjongs) {
 	let mapper = m => {
-		if(mahjongs.num == -1) {
+		if(m.num == -1) {
 			return -1;
+		}
+		if(m.style == Mahjong.ZiStyle) {
+			return m.style*20 + m.num*5;
 		}
 		return m.style*20 + m.num;
 	}
@@ -196,7 +199,12 @@ function mahjongs2dict(mahjongs) {
 function nums2mahjongs(nums) {
 	let mapper = n => {
 		if(n == -1) return new Mahjong(-1);
-		return new Mahjong(n%20, n/20|0);
+		let style = n/20>2 ? Mahjong.ZiStyle : n/20|0;
+		if(style == Mahjong.ZiStyle) {
+			return new Mahjong((n-Mahjong.ZiStyle*20)/5, Mahjong.ZiStyle);
+		} else {
+			return new Mahjong(n%20, n/20|0);
+		}
 	}
 	return nums.map(mapper);
 }

@@ -2,7 +2,7 @@
  * @param {Number} num 1-9(字1-7);
  * @param {Number} style 0-3, 0 mean 筒, 1 mean 索, 2 mean 萬, 3 mean 字
  */
-function Mahjong(num, style) {
+const Mahjong = function(num, style) {
 	if(this === undefined) return new Mahjong(num, style);
 	this.num = num;
 	this.style = style;
@@ -12,6 +12,12 @@ function Mahjong(num, style) {
 Mahjong.prototype.clone = function() {
 	return new Mahjong(this.num, this.style);
 }
+
+Mahjong.TongStyle = 0;
+Mahjong.SuoStyle = 1;
+Mahjong.WanStyle = 2;
+Mahjong.ZiStyle = 3;
+Object.freeze(Mahjong);
 
 /**
  * @param {Mahjong} other
@@ -66,6 +72,9 @@ Mahjong.prototype.toEmoji = function() {
 
 Object.defineProperty(Mahjong.prototype, 'imageUrl', {
 	get:function(){
+		if(this.num==-1) {
+			return './assets/WhiteMahjong.png';
+		}
 		let postfix = '';
 		if(this.style==3) {
 			postfix = [ , 'dong', 'nan', 'xi', 'bei', 'zhong', 'fa', 'bai'][this.num];
@@ -80,15 +89,20 @@ const MahjongFactory = function() {
 }
 
 MahjongFactory.sequenceBy = function(str) {
-	if(!/^([wWtTsSzZ][1-9]+)*$/.test(str)) {
+	if(!/^([wWtTsSzZvV][1-9]+)*$/.test(str)) {
 		return [];
 	}
-	let matches = str.match(/[wWtTsSzZ][1-9]+/g);
-	let styles = {'t':0, 's':1, 'w':2, 'z':3};
+	let matches = str.match(/[wWtTsSzZvV][1-9]+/g);
+	let styles = {'t':0, 's':1, 'w':2, 'z':3, 'v':4};
 	let mahjongs = [];
 	for(let mat of matches) {
 		let style = styles[mat[0].toLowerCase()];
-		mahjongs.push(...mat.substr(1).split('').map(c=>new Mahjong(+c, style)));
+		if(style == 4) {
+			let varCounts = +mat.substr(1);
+			mahjongs.push(...([...Array(varCounts)].map(_=>new Mahjong(-1))));
+		} else {
+			mahjongs.push(...mat.substr(1).split('').map(c=>new Mahjong(+c, style)));
+		}
 	}
 	return mahjongs;
 }
@@ -123,3 +137,9 @@ MahjongFactory.allMahjongs = function(){
 	return this;
 };
 
+if(!this.window) {
+	module.exports = {
+		Mahjong: Mahjong,
+		MahjongFactory: MahjongFactory
+	}
+}
