@@ -16,8 +16,10 @@
 			}
 			function solveStr() {
 				let str = document.querySelector('#mahjong_str').value;
+				let ifRandom = document.querySelector('#if_random').checked;
 				try {
 					let seq = MahjongFactory.sequenceBy(str);
+					if(ifRandom) seq = seq.sort((a,b)=>Math.random()-Math.random());
 					document.querySelector('#handDeck').innerHTML = seq.map(imgTagFor).join('');
 					let start = +new Date;
 					let solution = waitingMahjong(seq);
@@ -31,6 +33,9 @@
 		</script>
 		<br/>
 		<label>Mahjong Sequence String: </label><input id="mahjong_str"></input>
+		<br/>
+		<br/>
+		<label>Randomly(For test): </label><input type="checkbox" id='if_random'></input>
 		<br/>
 		<br/>
 		<button onclick="solveStr();"> submit </button>
