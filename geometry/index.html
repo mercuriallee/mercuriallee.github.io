@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
+<html>
+	<head>
+	</head>
+	<body>
+		<br/>
+		<label>圆柱直径: </label><input id="cylinder_D"></input><label> 米</label>
+		<br/>
+		<br/>
+		<label>圆柱高度(平躺长度): </label><input id="cylinder_H"></input><label> 米</label>
+		<br/>
+		<br/>
+		<label>内装液体密度: </label><input id="cylinder_P"></input><label>公斤/公升</label>
+		<br/>
+		<br/>
+		<label>平躺圆体时液面高度: </label><input id="cylinder_D1"></input><label>米</label>
+		<br/>
+		<br/>
+		<label>结果保留多少位小数: </label><input id="fixed_length" value='4'></input><label>米</label>
+		<br/>
+		<br/>
+		<label>圆柱容积: </label><label id="cylinder_volume"></label><label> 立方米</label>
+		<br/>
+		<br/>
+		<label>最大可装质量：</label><label id="cylinder_mass"></label><label> 公斤</label>
+		<br/>
+		<br/>
+		<label>实际质量: </label><label id="cylinder_real_mass"></label><label> 公斤</label>
+		<br/>
+		<br/>
+		<button onclick="commit();"> BEGIN </button>
+		<br/>
+		<br/>
+		<script src='./volume.js'> </script>
+		<script>
+			function commit() {
+				let D = document.querySelector('#cylinder_D').value;
+				let H = document.querySelector('#cylinder_H').value;
+				let P = document.querySelector('#cylinder_P').value;
+				let D1 = document.querySelector('#cylinder_D1').value;
+				let fixed_length = document.querySelector('#fixed_length').value;
+				if(D.length == 0 || H.length == 0 || P.length == 0 || D1.length==0 || fixed_length.length==0) {
+					alert('数据要填完!');
+					return;
+				}
+				try {
+					D=eval(D), H=eval(H), P=eval(P)*1000, D1=eval(D1), fixed_length=eval(fixed_length);
+				}catch(e){
+					alert("数据必须是数字或者算式");
+					return;
+				}
+				let cyd = new GasCylinder(D, H, P);
+				document.querySelector("#cylinder_volume").innerText = cyd.v().toFixed(fixed_length);
+				document.querySelector("#cylinder_mass").innerText = (cyd.v()*P).toFixed(fixed_length);
+				document.querySelector("#cylinder_real_mass").innerText = cyd.realV(D1).toFixed(fixed_length);
+			}
+		</script>
+	</body>
+</html>

@@ -1,0 +1,8 @@
+{
+	"plugins": {
+		"doc_comment":{"strong":true}
+	},
+	"libs": [
+		"browser"
+	]
+}
