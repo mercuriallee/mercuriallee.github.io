@@ -8,6 +8,8 @@ function markov_E(start, end, p) {
 	}
 }
 
-if(!window) {
+markov_E(1,10,0,0.7)
+
+if(!this.window) {
 	exports.markov_E = markov_E;
 }

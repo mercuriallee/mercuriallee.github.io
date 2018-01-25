@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<!--<meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>-->
+<html>
+	<head>
+	</head>
+	<body>
+		<br/>
+		<label>CPUs: </label><input id="num_cpus"></input>
+		<br/>
+		<br/>
+		<button onclick="testBegin();"> BEGIN </button>
+		<br/>
+		<br/>
+		<label>Result: </label><h id="result">null</h>
+		<br/>
+		<label>Cost: </label><h id="cost">null</h>
+		<br/>
+		<br/>
+		<script type='text/javascript'>
+			function testBegin() {
+				var num_cpus = +document.querySelector('#num_cpus').value, rest = num_cpus;
+				var startTime = +new Date, endTime;
+				for(var i=0; i<num_cpus; i++) {
+					var new_worker = new Worker('./worker.js');
+					new_worker.postMessage('hello');
+					new_worker.onmessage = function(){
+						rest--;
+						if(rest == 0) {
+							endTime = +new Date;
+							document.querySelector("#cost").innerText = endTime - startTime +' ms costed.';
+						}
+						document.querySelector("#result").innerText = num_cpus-rest+" CPUs completed.";
+					}
+				}
+			}
+		</script>
+	</body>
+</html>
