@@ -1,4 +1,3 @@
-
 let Fract = function(a, b){this.a=a; this.b=b};
 Fract.prototype.reduction = function() {
   let a1 = this.a, b1 = this.b;
@@ -121,3 +120,9 @@ function equalToRecursively(res, list, strs) {
   return false;
 }
 
+if(this.window == null) {
+	module.exports = {
+		equalTo: equalTo,
+		equalTo24: equalTo24
+	};
+}
