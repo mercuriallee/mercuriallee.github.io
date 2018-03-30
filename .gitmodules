@@ -1,0 +1,3 @@
+[submodule "gba1"]
+	path = gba1
+	url = https://github.com/mercuriallee/IodineGBA
