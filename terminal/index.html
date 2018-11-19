@@ -2,9 +2,9 @@
 <html>
 	<meta charset='utf-8'>
 	<head>
-		<link rel='stylesheet' href='http://mercurial.top/jslibs/jquery.terminal.css' />
-		<script src='http://mercurial.top/jslibs/jquery.js'> </script>
-		<script src='http://mercurial.top/jslibs/jquery.terminal.js'> </script>
+		<link rel='stylesheet' href='../jslibs/jquery.terminal.css' />
+		<script src='../jslibs/jquery.js'> </script>
+		<script src='../jslibs/jquery.terminal.js'> </script>
 	</head>
 
 	<body>
@@ -17,7 +17,7 @@
 					if(command !== '') {
 						try {
 							var result = window.eval(command);
-							if(result !== undefind) {
+							if(result !== undefined) {
 								this.echo(new String(result));
 							}
 						} catch(e) {
@@ -28,8 +28,8 @@
 					}
 				}, {
 					greetings: "Welcome to Mercurial's JQuery Terminal",
-					name: 'mercurial-terminal',
-					height: 300,
+					name: "Mercurial's Terminal",
+					height: $(document).height(),
 					prompt: 'js> '
 				});
 			});
