@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+	<meta charset='utf-8'>
+	<head>
+		<link rel='stylesheet' href='http://mercurial.top/jslibs/jquery.terminal.css' />
+		<script src='http://mercurial.top/jslibs/jquery.js'> </script>
+		<script src='http://mercurial.top/jslibs/jquery.terminal.js'> </script>
+	</head>
+
+	<body>
+		<div id='terminal'>
+		</div>
+
+		<script>
+			jQuery(function($, undefined){
+				$('#terminal').terminal(function(command){
+					if(command !== '') {
+						try {
+							var result = window.eval(command);
+							if(result !== undefind) {
+								this.echo(new String(result));
+							}
+						} catch(e) {
+							this.error(new String(e));
+						}
+					} else {
+						this.echo('');
+					}
+				}, {
+					greetings: "Welcome to Mercurial's JQuery Terminal",
+					name: 'mercurial-terminal',
+					height: 300,
+					prompt: 'js> '
+				});
+			});
+		</script>
+
+	</body>
+
+</html>
