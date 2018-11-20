@@ -1,5 +1,5 @@
 const currency = (function(){
-	function asyncCurrency({base, to, start, end, num}={}) {
+	function asyncCurrency({base, to, start, end, num}={}, cb) {
 
 		const Http = new XMLHttpRequest();
 
@@ -70,24 +70,22 @@ const currency = (function(){
 
 		let output = '';
 
-		return new Promise((res,rej) => {
-			Http.open("GET", url);
-			Http.send();
-			Http.onreadystatechange=(e)=>{
-				if(Http.readyState == Http.DONE) {
-					const rawData = Http.responseText;
-					output = handleOutput(JSON.parse(rawData));
-					res(output);
-				}
+		Http.open("GET", url);
+		Http.send();
+		Http.onreadystatechange=(e)=>{
+			if(Http.readyState == Http.DONE) {
+				const rawData = Http.responseText;
+				output = handleOutput(JSON.parse(rawData));
+				cb(output);
 			}
-		});
+		}
 	};
 
 	return function(args) {
 		if(window && window.terminal) {
-			asyncCurrency(args).then(function(res) {window.terminal.echo(res)});
+			asyncCurrency(args, window.terminal.echo);
 		}else {
-			asyncCurrency(args).then(function(res) {console.log(res)});
+			asyncCurrency(args, console.log);
 		}
 	}
 })();
