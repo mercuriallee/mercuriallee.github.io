@@ -2,18 +2,30 @@
 <html>
 	<meta charset='utf-8'>
 	<head>
+		<title> Mercurial's Terminal </title>
 		<link rel='stylesheet' href='../jslibs/jquery.terminal.css' />
 		<script src='../jslibs/jquery.js'> </script>
 		<script src='../jslibs/jquery.terminal.js'> </script>
+
+		<script src='../jslibs/math.js'> </script>
+
+		<!-- prism -->
+		<link rel="stylesheet prefetch" href="./prism.css"/>
+		<script src="./prism.js"></script>
+		<script src='./prism_wrapper.js'></script>
+
+		<!-- BTree -->
+		<script src='../BTree.js'> </script>
+		<!-- Sudoku Solver -->
+		<script src='../sudoku.js'> </script>
+		<!-- DLRank -->
+		<script src='../bin/dlrank.js'> </script>
 	</head>
 
 	<body>
-		<div id='terminal'>
-		</div>
-
 		<script>
 			jQuery(function($, undefined){
-				$('#terminal').terminal(function(command){
+				$('body').terminal(function(command){
 					if(command !== '') {
 						try {
 							var result = window.eval(command);
@@ -32,6 +44,14 @@
 					height: $(document).height(),
 					prompt: 'js> '
 				});
+
+				//Hightlight support.
+				// ---There are some bugs when typping '['.
+				/*
+				$.terminal.defaults.formatters.push(
+					 $.terminal.prism.bind(null, 'javascript')
+				);
+				*/
 			});
 		</script>
 
