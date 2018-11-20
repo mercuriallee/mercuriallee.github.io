@@ -18,14 +18,17 @@
 		<script src='../BTree.js'> </script>
 		<!-- Sudoku Solver -->
 		<script src='../sudoku.js'> </script>
-		<!-- DLRank -->
+		<!-- bin/DLRank -->
 		<script src='../bin/dlrank.js'> </script>
+		<!-- bin/currency -->
+		<script src='../bin/currency.js'> </script>
 	</head>
 
 	<body>
 		<script>
 			jQuery(function($, undefined){
 				$('body').terminal(function(command){
+					window.terminal = this;
 					if(command !== '') {
 						try {
 							var result = window.eval(command);

@@ -1,6 +1,7 @@
 const DLRank = (function() {
 
-	function getPn({n,p}){
+	function getPn({n,p}={}){
+		if(n==null || p==null) throw new Error("Please input parameters n and p.");
 
 		const win = p || 0.6, loss = 1-win;
 		n = n || 100;
@@ -112,7 +113,5 @@ const DLRank = (function() {
 		return summary;
 	}
 
-	return {
-		getPn: getPn
-	}
+	return getPn;
 })();
