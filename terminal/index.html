@@ -2,6 +2,9 @@
 <html>
 	<meta charset='utf-8'>
 	<head>
+		<script>
+			window.COMMANDS = {};
+		</script>
 		<title> Mercurial's Terminal </title>
 		<link rel='stylesheet' href='../jslibs/jquery.terminal.css' />
 		<script src='../jslibs/jquery.js'> </script>
@@ -14,6 +17,8 @@
 		<script src="./prism.js"></script>
 		<script src='./prism_wrapper.js'></script>
 
+		<!--exit command-->
+		<script src='../bin/exit.js'> </script>
 		<!-- BTree -->
 		<script src='../BTree.js'> </script>
 		<!-- Sudoku Solver -->
@@ -32,13 +37,17 @@
 				$('body').terminal(function(command){
 					window.terminal = this;
 					if(command !== '') {
-						try {
-							var result = window.eval(command);
-							if(result !== undefined) {
-								this.echo(new String(result));
+						if(typeof(window.COMMANDS[command.replace(/\s/g,'')]) == 'function') {
+							window.COMMANDS[command]();
+						} else {
+							try {
+								var result = window.eval(command);
+								if(result !== undefined) {
+									this.echo(new String(result));
+								}
+							} catch(e) {
+								this.error(new String(e));
 							}
-						} catch(e) {
-							this.error(new String(e));
 						}
 					} else {
 						this.echo('');
@@ -52,12 +61,8 @@
 				});
 
 				//Hightlight support.
-				// ---There are some bugs when typping '['.
-				/*
-				$.terminal.defaults.formatters.push(
-					 $.terminal.prism.bind(null, 'javascript')
-				);
-				*/
+				// There is a bug with ']'
+				//$.terminal.syntax('javascript');
 			});
 		</script>
 
