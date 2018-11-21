@@ -1,8 +1,9 @@
 const currency = (function(){
-	function asyncCurrency({base, to, start, end, num}={}, cb) {
+	function asyncCurrency({base, from, to, start, end, num}={}, cb) {
 
 		const Http = new XMLHttpRequest();
 
+		base  = base  || from;
 		base  = base  && base.trim().toUpperCase();
 		to    = to    && to.trim().toUpperCase();
 		start = start && start.trim();
@@ -20,7 +21,7 @@ const currency = (function(){
 				end = now.toISOString().replace(/T.*/, '');
 			}
 			if(!start.includes('-')) {
-				start = start.replace(/(?<=^\d{6})/, '-').replace(/(?<=^\d{4})/, '-');
+				start = start.replace(/^\d{6}/, r=>r+'-').replace(/^\d{4}/, r=>r+'-');
 			}
 		}
 
