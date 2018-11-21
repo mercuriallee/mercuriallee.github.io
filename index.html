@@ -1,72 +1,8 @@
 <!DOCTYPE html>
-<meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
 <html>
 	<head>
-	</head>
-	<body>
-		<script src="./Base.js"> </script>
-		<script src="./playcanvas-stable.js"> </script>
-		<script src="./markov.js"></script>
-		<script src="./24_game.js"></script>
-		<script src="./sudoku.js"> </script>
-		<script src="./cryption.js"> </script>
-		<script src="./skyscrapers.js"> </script>
-		<script type='text/javascript' src='./Lint.js'> </script>
-		<script type='text/javascript' src='./Lfloat.js'> </script>
-		<script src='./BTree.js'> </script>
-
 		<script>
-			let dict = {a: null, b: null, evl: null};
-			let submit = function() {
-				let start, end;
-				let node = document.getElementsByName('result')[0];
-				let cost = document.getElementById('cost');
-				let res = '';
-				if(dict.evl) {
-					start = +new Date;
-					try {
-						res = eval(dict.evl);
-					}catch(err) {
-						res = err;
-					}
-					end = +new Date;
-				} else {
-					start = +new Date;
-					res = C(dict.a, dict.b).to_i.toString();
-					end = +new Date;
-				} 
-				node.innerText = res;
-				cost.innerText = `${end-start}ms`;
-			}
-			
-			let A = function(n, m) {
-				return range(n-m+1,n).reduce((s,e)=>s.mul(Lfloat(e)), Lfloat(1));
-			}
-
-			let C = function(n, m) {
-				if(m > n/2) {
-					return C(n, n-m);
-				}
-				return A(n,m).div(A(m,m));
-			}
+			window.location.replace('terminal/index.html');
 		</script>
-		<br/>
-		<label>n: </label><input name="mul1" onchange="dict.a=parseInt(this.value);"></input>
-		<br/>
-		<br/>
-		<label>m: </label><input name="mul2" onchange="dict.b=parseInt(this.value);"></input>
-		<br/>
-		<br/>
-		<label>eval: </label><input name="eval_input" onchange=";dict.evl=this.value;"></input>
-		<br/>
-		<br/>
-		<button onclick="submit();"> submit </button>
-		<br/>
-		<br/>
-		<label>Result: </label><h name="result">null</h>
-		<br/>
-		<label>Cost: </label><h id="cost">null</h>
-		<br/>
-		<br/>
-	</body>
+	</head>
 </html>
