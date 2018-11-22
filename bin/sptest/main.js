@@ -11,5 +11,5 @@ window.COMMANDS['sptest'] = function() {
 			echo('Your connection speed is: \n'+'             '+sptitle);
 		}
 	}
-	image.src = location.pathname.replace(/\/index\.html[^\/]*$/, '/../bin/sptest/architecture-bay-beach.jpg');
+	image.src = location.pathname.replace(/\/index\.html[^\/]*$/, '/../bin/sptest/adventure-cold-daylight.jpg');
 };
