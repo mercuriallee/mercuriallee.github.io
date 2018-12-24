@@ -49,6 +49,30 @@ MahjongClient.prototype.drop = function(num) {
 	this.send({type: 'player-action-drop', num: num});
 }
 
+MahjongClient.prototype.gameBegin = function() {
+	this.send({type: 'game-action-begin'});
+}
+
+MahjongClient.prototype.smForward = function() {
+	this.send({type: 'sm-action-forward'});
+}
+
+MahjongClient.prototype.smTurnTo = function(master, phase){
+	this.send({type: 'sm-action-turn-to', master: master, phase: phase});
+}
+
+MahjongClient.prototype.smPhaseTo = function(phase) {
+	this.send({type: 'sm-aciton-phase-to', phase: phase});
+}
+
+MahjongClient.prototype.smReadRecord = function(phase, turn) {
+	this.send({type: 'sm-action-read-record', turn: turn});
+}
+
+MahjongClient.prototype.smWriteRecord = function(data, phase, turn) {
+	this.send({type: 'sm-action-write-record', phase: phase, turn: turn});
+}
+ 
 MahjongClient.prototype.deckWithType = function(type) {
 	let sessionId = this.room.sessionId;
 	let typeIndex = ({'hand': 0, 'sent': 1, 'faceup': 2, 'facedown': 3, 'dropping': 4})[type.toLowerCase()];
