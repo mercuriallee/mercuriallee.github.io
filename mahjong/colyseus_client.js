@@ -20,13 +20,15 @@ MahjongClient.prototype.enter = function({name, sessionId}={}) {
 	}
 	this.room   = this.client.join(name, {sessionId: sessionId});
 
-	this.room.onMessage.add(msg => {
+	let idChangeListener = msg => {
 		if(msg.type == 'adapt-id') {
 			let oldId = this.room.sessionId;
 			this.room.sessionId = msg.sessionId;
 			console.log(`Adopt new sessionId from ${oldId} to ${this.room.sessionId}.`);
+			this.room.onMessage.remove(idChangeListener);
 		}
-	});
+	}
+	this.room.onMessage.add(idChangeListener);
 }
 
 MahjongClient.prototype.send = function(msg) {
@@ -65,12 +67,24 @@ MahjongClient.prototype.smPhaseTo = function(phase) {
 	this.send({type: 'sm-aciton-phase-to', phase: phase});
 }
 
-MahjongClient.prototype.smReadRecord = function(phase, turn) {
-	this.send({type: 'sm-action-read-record', turn: turn});
+MahjongClient.prototype.smReadRecord = function(cb, phase, turn) {
+	let uid = uuidv1();
+	this.send({type: 'sm-action-read-record', turn: turn, uid:uid});
+	let recordListener = msg => {
+		if(msg.rev.uid == uid) {
+			if(cb == null) {
+				console.log(msg.record);
+			} else {
+				cb(msg.record);
+			}
+			this.room.onMessage.remove(recordListener);
+		}
+	}
+	this.room.onMessage.add(recordListener);
 }
 
 MahjongClient.prototype.smWriteRecord = function(data, phase, turn) {
-	this.send({type: 'sm-action-write-record', phase: phase, turn: turn});
+	this.send({type: 'sm-action-write-record', phase: phase, turn: turn, data:data});
 }
  
 MahjongClient.prototype.deckWithType = function(type) {
@@ -127,7 +141,7 @@ r1.listen('history/:id', change => {
 
 // init hand decks.
 setTimeout(function() {
-	c1.requestShuffleStock();
+	c1.gameBegin();
 
 	c1.draw(13, 0);
 	c2.draw(13, 0);
