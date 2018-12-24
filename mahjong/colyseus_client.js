@@ -14,11 +14,11 @@ const MahjongClient  = function(){
 	this.room = null;
 }
 
-MahjongClient.prototype.enter = function({name, sessionId}={}) {
+MahjongClient.prototype.enter = function({name, sessionIdPre}={}) {
 	if(name == null) {
 		name = 'gameMsg';
 	}
-	this.room   = this.client.join(name, {sessionId: sessionId});
+	this.room   = this.client.join(name, {sessionIdPre: sessionIdPre});
 
 	let idChangeListener = msg => {
 		if(msg.type == 'adapt-id') {
@@ -49,6 +49,10 @@ MahjongClient.prototype.draw = function(num, pos) {
 
 MahjongClient.prototype.drop = function(num) {
 	this.send({type: 'player-action-drop', num: num});
+}
+
+MahjongClient.prototype.rejoin = function() {
+	this.room = this.client.rejoin(this.room.id, this.room.sessionId);
 }
 
 MahjongClient.prototype.gameBegin = function() {
@@ -105,7 +109,7 @@ const MahjongTester = (function(){
 
 	for(let i=0; i<4; i++) {
 		clients[i] = new MahjongClient();
-		clients[i].enter({sessionId: i});
+		clients[i].enter({sessionIdPre: i});
 	}
 
 	return {
@@ -124,20 +128,24 @@ const r2 = c2.room;
 const r3 = c3.room;
 const r4 = c4.room;
 
-r1.listen('stock/:props', change=> {
-	console.log('Stock changed.');
-	console.log(change);
-});
+function setupListener(room) {
+	room.listen('stock/:props', change=> {
+		console.log('Stock changed.');
+		console.log(change);
+	});
 
-r1.listen('decks/:sid/:type/:index', change=> {
-	console.log('Decks changed.');
-	console.log(change);
-});
+	room.listen('decks/:sid/:type/:index', change=> {
+		console.log('Decks changed.');
+		console.log(change);
+	});
 
-r1.listen('history/:id', change => {
-	console.log("History changed.");
-	console.log(change);
-});
+	room.listen('history/:id', change => {
+		console.log("History changed.");
+		console.log(change);
+	});
+}
+
+setupListener(r1);
 
 // init hand decks.
 setTimeout(function() {
