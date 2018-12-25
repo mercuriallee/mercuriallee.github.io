@@ -68,7 +68,7 @@ MahjongClient.prototype.smTurnTo = function(master, phase){
 }
 
 MahjongClient.prototype.smPhaseTo = function(phase) {
-	this.send({type: 'sm-aciton-phase-to', phase: phase});
+	this.send({type: 'sm-action-phase-to', phase: phase});
 }
 
 MahjongClient.prototype.smReadRecord = function(cb, phase, turn) {
@@ -101,6 +101,10 @@ MahjongClient.prototype.dwt = MahjongClient.prototype.deckWithType;
 MahjongClient.prototype.deckHandle = function(operation) {
 	this.send({type: 'player-action-deck-handle', operation: operation});
 
+}
+
+MahjongClient.prototype.chi = function() {
+	this.send({type: 'vote-action-chi'});
 }
 
 const MahjongTester = (function(){
@@ -158,3 +162,19 @@ setTimeout(function() {
 
 	c1.draw(1, 0);
 }, 2000);
+
+const UnitTest = function(){}
+UnitTest.prototype.testChi = function() {
+	c1.smPhaseTo('send');
+	let num = c1.dwt('hand').slice(-1)[0];
+	c1.drop(num);
+	console.log('c1 dropped '+num);
+	c1.smWriteRecord({sent: num});
+	c1.send({type: 'vote-action-nil'});
+	c3.send({type: 'vote-action-nil'});
+	c4.send({type: 'vote-action-nil'});
+	c2.chi();
+}
+
+let ut = new UnitTest();
+setTimeout(ut.testChi, 5000);
