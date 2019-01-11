@@ -107,6 +107,10 @@ MahjongClient.prototype.chi = function() {
 	this.send({type: 'vote-action-chi'});
 }
 
+MahjongClient.prototype.pass = function({uuid}={}) {
+	this.send({type: 'vote-action-nil', uuid:uuid});
+}
+
 const MahjongTester = (function(){
 
 	let clients = [];
@@ -170,10 +174,15 @@ UnitTest.prototype.testChi = function() {
 	c1.drop(num);
 	console.log('c1 dropped '+num);
 	c1.smWriteRecord({sent: num});
-	c1.send({type: 'vote-action-nil'});
-	c3.send({type: 'vote-action-nil'});
-	c4.send({type: 'vote-action-nil'});
+	let testuuid1 = uuidv1();
+	c1.pass({uuid:testuuid1});
+	c3.pass();
+	c4.pass();
 	c2.chi();
+	console.log('Test uuid1 = '+testuuid1);
+	c1.room.onMessage.add(msg=> {
+		console.log(msg);
+	});
 }
 
 let ut = new UnitTest();
