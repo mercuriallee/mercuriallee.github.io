@@ -34,13 +34,31 @@ function linkUp(map) {
 	return recursivelyLink(g, dict);
 }
 
+function charPriority(ch, g, dict) {
+	let vs = dict[ch];
+	for(let i=0; i<vs.length-1; i++) {
+		for(let j=i+1; j<vs.length; j++) {
+			let a = vs[i], b = vs[j];
+			if(a[0]==b[0] && Math.abs(a[1]-b[1])==1 || a[1] == b[1] && Math.abs(a[0]-b[0])==1) {
+				return 1;
+			}
+		}
+	}
+	let priority = 1;
+	for(let [r,c] of dict[ch]) {
+		priority *= [[-1,0],[1,0],[0,-1],[0,1],[1,1],[1,-1],[-1,1],[-1,-1]].reduce((s,[i,j])=> s+((g[r+i]||[])[c+j] != null), 1);
+	}
+	return priority;
+}
+
 function recursivelyLink(g, dict, restLinks) {
 	if(restLinks == null) {
 		restLinks = g.length * g[0].length / 2;
 	}
 	if(restLinks == 0) return [];
+	let sortedKeys = Object.keys(dict).filter(k=>dict[k].length!=0).sort((a,b) => charPriority(a, g, dict)-charPriority(b, g, dict));
 	let cb = function(){};
-	for(let ch in dict) {
+	for(let ch of sortedKeys) {
 		let vs = dict[ch];
 		for(let i=0; i<vs.length-1; i++) {
 			for(let j=i+1; j<vs.length; j++) {
@@ -103,6 +121,7 @@ function linkable(g, v1, v2) {
 	}
 	return false;
 }
+
 console.log(linkable(g, [2,2], [3,3]));
 console.log('-----------------');
 
