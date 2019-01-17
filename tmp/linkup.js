@@ -34,6 +34,21 @@ function linkUp(map) {
 	return recursivelyLink(g, dict);
 }
 
+function verticesSort(g, dict) {
+	for(let ch in dict) {
+		let vs = dict[ch];
+		for(let i=0; i<vs.length-1; i++) {
+			for(let j=i+1; j<vs.length; j++) {
+				let a = vs[i], b = vs[j];
+				if(a[0]==b[0] && Math.abs(a[1]-b[1])==1 || a[1] == b[1] && Math.abs(a[0]-b[0])==1) {
+					vs.splice(0,0,vs.splice(j,1)[0]);
+					vs.splice(0,0,vs.splice(i,1)[0]);
+				}
+			}
+		}
+	}
+}
+
 function charPriority(ch, g, dict) {
 	let vs = dict[ch];
 	for(let i=0; i<vs.length-1; i++) {
@@ -56,6 +71,7 @@ function recursivelyLink(g, dict, restLinks) {
 		restLinks = g.length * g[0].length / 2;
 	}
 	if(restLinks == 0) return [];
+	verticesSort(g, dict);
 	let sortedKeys = Object.keys(dict).filter(k=>dict[k].length!=0).sort((a,b) => charPriority(a, g, dict)-charPriority(b, g, dict));
 	let cb = function(){};
 	for(let ch of sortedKeys) {
