@@ -16,7 +16,7 @@ let g = [
 g['space'] = [1,3];
 g.blocks = [];
 
-function moveSpaceTo([dx, dy], g, {test, blocks}) {
+function moveSpaceTo([dx, dy], g, {test, blocks}={}) {
 	if(blocks == null) {
 		blocks = [];
 	}
@@ -120,14 +120,61 @@ function moveTile(pos, to, g) {
 				}
 			}
 			tap(pos, g);
-			movements = [...movements, pos, ...moveTile(nextPos, to, g)];
+			let rests = moveTile(nextPos, to, g);
+			try {
+				let test = [...movements, pos, ...rests];
+			} catch (err) {
+				debugger;
+			}
+			movements = [...movements, pos, ...rests];
 			return movements;
 		}
 	}
 }
 
 function tileExists(pos, g) {
-	return g[pos[0]] && g[pos[0]][pos[1]];
+	return g[pos[0]] != null && g[pos[0]][pos[1]] != null;
+}
+
+/**
+ * 1 3 2     1   2         2   5    
+ * 4   5  => 4 3 5 => ...  1 3 8  =>
+ * 6 7 8     6 7 8		   4 6 7	
+ *
+ * 2 3 5	 2 3 5		   1 2 3
+ * 1   8 =>  1 8   => ...    8 5
+ * 4 6 7	 4 6 7         4 6 7
+ */
+function swapWithRightTiles(pos, g) {
+	// center position.
+	let tapSeqs = [];
+	let tmpTap = tap;
+	tap = function(tile) {
+		tmpTap(tile,g);
+		tapSeqs.push(tile);
+	}
+	let [r,c] = [pos[0]+1, pos[1]];
+	let [
+		t1,t2,t3,t4,t5,t6,t7,t8,t9
+	]
+		= [
+		[r-1,c-1], [r-1,c], [r-1,c+1], [r,c-1], [r,c], [r,c+1], [r+1,c-1], [r+1,c], [r+1,c+1]
+	];
+
+	if(![t1,t2,t3,t4,t5,t6,t7,t8,t9].every(t=>tileExists(t,g))) {
+		return false;
+	}
+
+	tapSeqs.push(...moveSpaceTo(t5,g,{avoids:[t1,t2,t3],test:false}));
+	tap(t2);
+	//rotate counter-clockwisely.
+	[t3,t6,t9,t8,t7,t4,t1].forEach(t=>tap(t));
+	tap(t2);
+	tap(t5);
+	tap(t6);
+	//rotate clockwisely to turn [t1,t2,t3] back to top row;
+	[t3,t2,t1,t4].forEach(t=>tap(t));
+	return tapSeqs;
 }
 
 function swapSpaceWithDirect(direct, g) {
@@ -141,12 +188,54 @@ function swapSpaceWithDirect(direct, g) {
 		return false;
 	}
 }
+
+function solve(g) {
+	let tapSeqs = [];
+	let tmpAdjust = adjustNumber, tmpTap = tap, tmpMoveSpace = moveSpaceTo;
+	function adjust(num,to) {
+		console.log('Adjust number '+num+' to '+to);
+		tapSeqs.push(...tmpAdjust(num,to,g,{markBlock:true}));
+	}
+	function tp(t) {
+		tapSeqs.push(tmpTap(t,g));
+	}
+	function ms(t,{test,blocks}={}) {
+		tapSeqs.push(...tmpMoveSpace(t,g,{test:test,blocks:blocks}));
+	}
+	
+	let rows = g.length, cols = g[0].length;
+	for(let r=0; r<rows-2; r++) {
+		let r0 = (r+1)*cols; r1 = r0-1;
+		for(let num=r*cols+1;num<r1;num++) {
+			adjust(num,num);
+		}
+		adjust(r0,r1);
+		if(g[r][cols-1] == r1) {
+			tapSeqs.push(...swapWithRightTiles([r,cols-2],g));
+			g.blocks.push([r,cols-2],[r,cols-1]);
+		}else {
+			adjust(r1,r1+cols);
+			ms([rows-1,cols-1]);
+			ms([r,cols-1]);
+			tp([r,cols-2]);
+			tp([r+1,cols-2]);
+
+			g.blocks.splice(g.blocks.length-1,1,[r,cols-2],[r,cols-1]);
+		};
+		console.log(g.map(r=>r.join('  ')).join('\n'));
+	}
+	return tapSeqs;
+}
+/*
 let res = [
 	...adjustNumber(1,1,g,{markBlock:true}),
 	...adjustNumber(2,2,g,{markBlock:true}),
 	...adjustNumber(4,3,g,{markBlock:true}),
 	...adjustNumber(3,7,g,{markBlock:true})
 ];
+*/
 
 console.log(g.map(r=>r.join('  ')).join('\n'));
-console.log(res);
+let res = solve(g);
+console.log(res.length);
+console.log(g.map(r=>r.join('  ')).join('\n'));
