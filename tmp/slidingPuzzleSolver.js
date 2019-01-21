@@ -6,15 +6,11 @@
 /*
  * g[space] = [x, y] where [x,y] is the location of space block;
  */
-
 let g =
-[ [ 13, 24, 10, 35, 7, 19, 12 ],
-  [ 1, 2, 9, 33, 17, 39, 6 ],
-  [ 27, 8, 18, 37, 47, 20, 11 ],
-  [ 5, 3, 23, 22, 4, 14, 38 ],
-  [ 44, 29, 15, 16, 31, 32, 26 ],
-  [ 46, 30, 0, 28, 25, 41, 40 ],
-  [ 45, 43, 36, 34, 21, 42, 48 ] ]
+[ [ 1, 7, 12, 11 ],
+  [ 4, 0, 9, 2 ],
+  [ 6, 3, 15, 14 ],
+  [ 13, 10, 8, 5 ] ]
 ;
 
 function slidePuzzle(arr){
@@ -34,7 +30,7 @@ function slidePuzzle(arr){
     if(res) {
       return taps;
     }
-    return false;
+    return null;
 }
 
 function moveSpaceTo([dx, dy], g, {test, blocks, taps}={}) {
@@ -235,6 +231,9 @@ function solve(g, {taps}={}) {
 			adjust(num,num);
 		}
 		adjust(r0,r1);
+		if(g[r][cols-1] == 0) {
+			tp([r+1,cols-1]);
+		}
 		if(g[r][cols-1] == r1) {
 			tapSeqs.push(...swapWithRightTiles([r,cols-2],g,{taps}));
 			g.blocks.push([r,cols-1]);
@@ -255,6 +254,9 @@ function solve(g, {taps}={}) {
 	for(let c=0; c<cols-2; c++) {
 		let n0 = cols*r0+c+1, n1 = cols*r1+c+1;
 		adjust(n1,n0);
+		if(g[r1][c] == 0) {
+			tp([r1,c+1]);
+		}
 		if(g[r1][c] != n0) {
 			adjust(n0,n0+1);
 			ms([r1,c]);
@@ -279,12 +281,13 @@ function solve(g, {taps}={}) {
 			[t5,t4,t1,t2,t3].forEach(t=>tp(t));
 			g.blocks.push([r1,c]);
 		}
-	}
+	} 
 	// solve rest 4(include space) tiles.
 	adjust(cols*(rows-1)-1, cols*(rows-1)-1);
 	ms([rows-1,cols-1]);
 	console.log(g.map(e=>e.join(' ')).join('\n'));
 	return g[rows-1][cols-2] == rows*cols-1 ? tapSeqs : null;
+
 }
 
 function test1(){
@@ -296,14 +299,24 @@ function test1(){
 }
 
 function test(){
-	let taps = slidePuzzle(g);
+	let g0 = g.map(e=>e.slice());
+	g.blocks = [];
+	for(let r=0; r<g.length; r++) {
+		for(let c=0; c<g[0].length; c++) {
+			if(g[r][c] == 0) {
+				g.space = [r,c];
+			}
+		}
+	}
+	let taps = slidePuzzle(g0);
 	let bl = true;
 	for(let n of taps) {
 		let i = -1;
-		for(let r=0; r<g.length; r++) {
+		fs: for(let r=0; r<g.length; r++) {
 			for(let c=0; c<g[0].length; c++) {
 				if(g[r][c] == n) {
 					i = [r,c];
+					break fs;
 				}
 			}
 		}
