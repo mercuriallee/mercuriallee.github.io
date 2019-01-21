@@ -7,16 +7,37 @@
  * g[space] = [x, y] where [x,y] is the location of space block;
  */
 
-let g = [
-	[10, 3, 6, 4],
-	[1, 5, 8, 0],
-	[2, 13, 7, 15],
-	[14, 9, 12, 11]
-];
-g['space'] = [1,3];
-g.blocks = [];
+let g =
+[ [ 13, 24, 10, 35, 7, 19, 12 ],
+  [ 1, 2, 9, 33, 17, 39, 6 ],
+  [ 27, 8, 18, 37, 47, 20, 11 ],
+  [ 5, 3, 23, 22, 4, 14, 38 ],
+  [ 44, 29, 15, 16, 31, 32, 26 ],
+  [ 46, 30, 0, 28, 25, 41, 40 ],
+  [ 45, 43, 36, 34, 21, 42, 48 ] ]
+;
 
-function moveSpaceTo([dx, dy], g, {test, blocks}={}) {
+function slidePuzzle(arr){
+    let g = arr, taps = [];
+    fs: for(let i=0; i<arr.length; i++) {
+          for(let j=0; j<arr[0].length;j++) {
+             if(arr[i][j] == 0) {
+               g.space = [i,j];
+               break fs;
+             }
+          }
+    }
+    g.blocks = [];
+    let res = solve(g, {taps});
+	console.log('res length: '+res.length);
+	console.log('taps length: '+taps.length);
+    if(res) {
+      return taps;
+    }
+    return false;
+}
+
+function moveSpaceTo([dx, dy], g, {test, blocks, taps}={}) {
 	if(blocks == null) {
 		blocks = [];
 	}
@@ -41,9 +62,14 @@ function moveSpaceTo([dx, dy], g, {test, blocks}={}) {
 		cb = function() {
 			swapSpaceWithDirect([dir[0]*-1, dir[1]*-1], g);
 		};
-		if(swapSpaceWithDirect(dir, g)) {
-			let restMovements = moveSpaceTo([dx, dy], g, {test:test, blocks:blocks});
+		let tapped = swapSpaceWithDirect(dir, g);
+		(taps == null || test) && (taps = []);
+		if(tapped != false) {
+			let restTaps = [];
+			let restMovements = moveSpaceTo([dx, dy], g, {test, blocks, taps:restTaps});
 			if(restMovements.length != null) {
+				taps.push(tapped);
+				taps.push(...restTaps);
 				test && cb();
 				return [[sLoc[0]+dir[0], sLoc[1]+dir[1]], ...restMovements];
 			} else {
@@ -58,14 +84,16 @@ function moveSpaceTo([dx, dy], g, {test, blocks}={}) {
 	return false;
 }
 
-function tap([x,y], g) {
+function tap([x,y], g, {taps}={}) {
 	let dir = [[-1,0], [1,0], [0,-1], [0,1]].find(([r,c])=>x==r+g.space[0] && y==c+g.space[1]);
 	if(dir != null) {
-		swapSpaceWithDirect(dir, g);
+		let tapped = swapSpaceWithDirect(dir, g);
+		taps != null && taps.push(tapped);
+		return tapped;
 	}
 }
 
-function adjustNumber(num, to, g, {markBlock}) {
+function adjustNumber(num, to, g, {markBlock,taps}) {
 	if(g == null) {
 		g = to;
 		to = num;
@@ -75,7 +103,7 @@ function adjustNumber(num, to, g, {markBlock}) {
 		for(let c=0; c<C; c++) {
 			if(g[r][c] == num) {
 				let toLoc = [(to-1)/C|0, (to-1)%C];
-				let movements = moveTile([r,c], toLoc, g);
+				let movements = moveTile([r,c], toLoc, g,{taps});
 				markBlock && g.blocks.push(toLoc);
 				return movements;
 			}
@@ -83,7 +111,7 @@ function adjustNumber(num, to, g, {markBlock}) {
 	}
 }
 
-function moveTile(pos, to, g) {
+function moveTile(pos, to, g, {taps}={}) {
 	let movements = [];
 	if(pos[0] == to[0] && pos[1] == to[1]) {
 		return [];
@@ -103,29 +131,24 @@ function moveTile(pos, to, g) {
 
 			if(nextPos[0]!=sPos[0] || nextPos[1]!=sPos[1]) {
 				// move space to next position.
-				let spaceMovements = moveSpaceTo(nextPos, g, {test:true, blocks:[pos]});
+				let spaceMovements = moveSpaceTo(nextPos, g, {test:true, blocks:[pos], taps});
 				if(spaceMovements.length) {
-					spaceMovements.forEach(m=>tap(m,g));
+					spaceMovements.forEach(m=>tap(m,g,{taps}));
 					movements = [...spaceMovements];
 				} else {
 					let midPos = [g.length-1, g[0].length-1];
-					let movements1 = moveSpaceTo(midPos, g, {blocks:[pos]});
-					let movements2 = moveSpaceTo(nextPos, g, {blocks:[pos], test:true});
+					let movements1 = moveSpaceTo(midPos, g, {blocks:[pos], taps});
+					let movements2 = moveSpaceTo(nextPos, g, {blocks:[pos], test:true, taps});
 					if(!movements2.length) {
 						continue;
 					}
-					movements2.length && movements2.forEach(m=>tap(m,g));
+					movements2.forEach(m=>tap(m,g,{taps}));
 
 					movements = [...(movements1 || []), ...(movements2 || [])];
 				}
 			}
-			tap(pos, g);
-			let rests = moveTile(nextPos, to, g);
-			try {
-				let test = [...movements, pos, ...rests];
-			} catch (err) {
-				debugger;
-			}
+			tap(pos, g, {taps});
+			let rests = moveTile(nextPos, to, g, {taps});
 			movements = [...movements, pos, ...rests];
 			return movements;
 		}
@@ -145,12 +168,12 @@ function tileExists(pos, g) {
  * 1   8 =>  1 8   => ...    8 5
  * 4 6 7	 4 6 7         4 6 7
  */
-function swapWithRightTiles(pos, g) {
+function swapWithRightTiles(pos, g, {taps}) {
 	// center position.
 	let tapSeqs = [];
 	let tmpTap = tap;
-	tap = function(tile) {
-		tmpTap(tile,g);
+	tp = function(tile) {
+		tmpTap(tile,g,{taps});
 		tapSeqs.push(tile);
 	}
 	let [r,c] = [pos[0]+1, pos[1]];
@@ -165,54 +188,56 @@ function swapWithRightTiles(pos, g) {
 		return false;
 	}
 
-	tapSeqs.push(...moveSpaceTo(t5,g,{avoids:[t1,t2,t3],test:false}));
-	tap(t2);
+	tapSeqs.push(...moveSpaceTo(t5,g,{avoids:[t1,t2,t3],test:false,taps}));
+	tp(t2);
 	//rotate counter-clockwisely.
-	[t3,t6,t9,t8,t7,t4,t1].forEach(t=>tap(t));
-	tap(t2);
-	tap(t5);
-	tap(t6);
+	[t3,t6,t9,t8,t7,t4,t1].forEach(t=>tp(t));
+	tp(t2);
+	tp(t5);
+	tp(t6);
 	//rotate clockwisely to turn [t1,t2,t3] back to top row;
-	[t3,t2,t1,t4].forEach(t=>tap(t));
+	[t3,t2,t1,t4].forEach(t=>tp(t));
 	return tapSeqs;
 }
 
 function swapSpaceWithDirect(direct, g) {
 	let [x1, y1] = direct;
 	let [x, y] = g.space;
+	let tapped = null;
 	if(g[x+x1] && g[x+x1][y+y1]) {
 		[g[x][y], g[x+x1][y+y1]] = [g[x+x1][y+y1], g[x][y]];
+		tapped = g[g.space[0]][g.space[1]];
 		g.space = [x+x1, y+y1];
-		return g.space;
+		return tapped;
 	} else {
 		return false;
 	}
 }
 
-function solve(g) {
+function solve(g, {taps}={}) {
 	let tapSeqs = [];
 	let tmpAdjust = adjustNumber, tmpTap = tap, tmpMoveSpace = moveSpaceTo;
-	function adjust(num,to) {
+	function adjust(num,to,markBlock=true) {
 		console.log('Adjust number '+num+' to '+to);
-		tapSeqs.push(...tmpAdjust(num,to,g,{markBlock:true}));
+		tapSeqs.push(...tmpAdjust(num,to,g,{markBlock,taps}));
 	}
 	function tp(t) {
-		tapSeqs.push(tmpTap(t,g));
+		tapSeqs.push(tmpTap(t,g,{taps}));
 	}
 	function ms(t,{test,blocks}={}) {
-		tapSeqs.push(...tmpMoveSpace(t,g,{test:test,blocks:blocks}));
+		tapSeqs.push(...tmpMoveSpace(t,g,{test,blocks,taps}));
 	}
 	
 	let rows = g.length, cols = g[0].length;
 	for(let r=0; r<rows-2; r++) {
-		let r0 = (r+1)*cols; r1 = r0-1;
+		let r0 = (r+1)*cols, r1 = r0-1;
 		for(let num=r*cols+1;num<r1;num++) {
 			adjust(num,num);
 		}
 		adjust(r0,r1);
 		if(g[r][cols-1] == r1) {
-			tapSeqs.push(...swapWithRightTiles([r,cols-2],g));
-			g.blocks.push([r,cols-2],[r,cols-1]);
+			tapSeqs.push(...swapWithRightTiles([r,cols-2],g,{taps}));
+			g.blocks.push([r,cols-1]);
 		}else {
 			adjust(r1,r1+cols);
 			ms([rows-1,cols-1]);
@@ -220,22 +245,76 @@ function solve(g) {
 			tp([r,cols-2]);
 			tp([r+1,cols-2]);
 
-			g.blocks.splice(g.blocks.length-1,1,[r,cols-2],[r,cols-1]);
+			g.blocks.splice(g.blocks.length-1,1,[r,cols-1]);
 		};
 		console.log(g.map(r=>r.join('  ')).join('\n'));
 	}
-	return tapSeqs;
-}
-/*
-let res = [
-	...adjustNumber(1,1,g,{markBlock:true}),
-	...adjustNumber(2,2,g,{markBlock:true}),
-	...adjustNumber(4,3,g,{markBlock:true}),
-	...adjustNumber(3,7,g,{markBlock:true})
-];
-*/
 
-console.log(g.map(r=>r.join('  ')).join('\n'));
-let res = solve(g);
-console.log(res.length);
-console.log(g.map(r=>r.join('  ')).join('\n'));
+	// solve bottom two rows.
+	let r0 = rows-2, r1 = rows-1;
+	for(let c=0; c<cols-2; c++) {
+		let n0 = cols*r0+c+1, n1 = cols*r1+c+1;
+		adjust(n1,n0);
+		if(g[r1][c] != n0) {
+			adjust(n0,n0+1);
+			ms([r1,c]);
+			tp([r0,c]);
+			tp([r0,c+1]);
+			g.blocks.pop();
+			g.blocks.push([r1,c]);
+		} else {
+			/** swap n0 and n1;
+			 *
+			 *  n1 a b  =>    a b =>  a  b  d  => n1    d =>  n1 n0 a => n0 a  
+			 *  n0   d    n1 n0 d       n1 n0      b a  n0    b   d      n1 b d
+			 */
+			let [t1,t2,t3,t4,t5,t6] = [
+				[r0,c], [r0,c+1], [r0,c+2], [r1,c], [r1,c+1], [r1,c+2]
+			];
+			ms(t5);
+			tp(t4),tp(t1);
+			[t2,t3,t6,t5,t4].forEach(t=>tp(t));
+			[t1,t2,t5, t4,t1,t2].forEach(t=>tp(t));
+			[t3,t6,t5, t2,t3,t6].forEach(t=>tp(t));
+			[t5,t4,t1,t2,t3].forEach(t=>tp(t));
+			g.blocks.push([r1,c]);
+		}
+	}
+	// solve rest 4(include space) tiles.
+	adjust(cols*(rows-1)-1, cols*(rows-1)-1);
+	ms([rows-1,cols-1]);
+	console.log(g.map(e=>e.join(' ')).join('\n'));
+	return g[rows-1][cols-2] == rows*cols-1 ? tapSeqs : null;
+}
+
+function test1(){
+	console.log(g.map(r=>r.join('  ')).join('\n'));
+	let taps = [];
+	let res = slidePuzzle(g);
+	console.log(res.join(','));
+	console.log(g.map(r=>r.join('  ')).join('\n'));
+}
+
+function test(){
+	let taps = slidePuzzle(g);
+	let bl = true;
+	for(let n of taps) {
+		let i = -1;
+		for(let r=0; r<g.length; r++) {
+			for(let c=0; c<g[0].length; c++) {
+				if(g[r][c] == n) {
+					i = [r,c];
+				}
+			}
+		}
+		if(!tap(i, g) && bl){
+			console.log(`###################`);
+			console.log(g.map(e=>e.join('  ')).join('\n'));
+			bl = false;
+		}; 
+	}
+	console.log('Final state of taps: ')
+	console.log(g.map(e=>e.join('  ')).join('\n'));
+}
+
+test();
