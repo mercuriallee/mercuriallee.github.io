@@ -23,7 +23,7 @@ function insAndOuts(gamemap){
 		}
 	}
 
-	let presolve = maySolve(g);
+	let presolve = findMinTree(g, {I, O, E});
 	debugger;
 
 	//return findMaxTree(g, {include: I, exclude: O, empty: E, visited: visited});
@@ -32,7 +32,56 @@ function insAndOuts(gamemap){
 
 function maySolve(g) {
 	let blocksGraph = g.map(r=>r.map(e=>e=='I' ? 0 : 1));
-	return pathsOf(blocksGraph);
+	//return pathsOf(blocksGraph);
+	return connectivity(g);
+}
+
+// V+F = E+c
+function connectivity(g) {
+	g = g.map(r=>r.slice());
+	let exist = (r,c) => g[r] && g[r][c];
+	let count = 0;
+	for(let r=0; r<g.length; r++) {
+		for(let c=0; c<g[r].length; c++) {
+			if(exist(r,c)) {
+				count++;
+				let connecteds = [[r,c]];
+				while(connecteds.length) {
+					let [r,c] = connecteds.pop();
+					g[r][c] = 0;
+					[[-1,0],[0,-1],[1,0],[0,1]].forEach(([x,y])=>exist(r+x,c+y) && connecteds.push([r+x,c+y]));
+				}
+			}
+		}
+	}
+	return count;
+}
+
+function findMinTree(g, {I, O, E}) {
+	let exist = (r,c) => g[r] && g[r][c];
+	let visited = g.map(r=>r.map(e=>e==I?1:0));
+	let neighbors = (r,c) => [[1,0],[0,1],[0,-1],[-1,0]].reduce((a,[x,y])=>(exist(r+x,c+y) && g[r+x][c+y]==E && a.push([r+x,c+y]),a),[]);
+	let Is = g.reduce((a,r,i)=>(r.forEach((e,j)=>e==I && a.push([i,j])),a), []);
+	let outline = Is.reduce((a,[r,c])=>(a.push(...neighbors(r,c)),a), []);
+	let conn = connectivity(visited), vn = 4*Is.length, en = 4*Is.length;
+	for(let r=0; r<g.length; r++) {
+		for(let c=0; c<g[r].length; c++) {
+			g[r][c] == I && exist(r,c+1) && g[r][c+1] == I && (en-=1);
+			g[r][c] == I && exist(r+1,c) && g[r+1][c] == I && (en-=1);
+			if(r==0) {
+				exist(r,c+1) && g[r][c] == I && g[r][c+1] == I && (vn-=1);
+			}
+			if(c==0) {
+				exist(r+1,c) && g[r][c] == I && g[r+1][c] == I && (vn-=1);
+			}
+			vn -= Math.max([[r,c],[r+1,c],[r,c+1],[r+1,c+1]].reduce((a,[x,y])=>exist(x,y) && g[x][y]==I ? a+1:a , -1), 0);
+		}
+	}
+
+	if(vn+Is.length != en+conn) return false;
+
+	while(conn > 1) {
+	}
 }
 
 function pathsOf(g) {
