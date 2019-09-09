@@ -1,17 +1,14 @@
-var crypto = require('crypto');
 
-function cryptPwd(password) {
-	var md5 = crypto.createHash('md5');
-	return md5.update(password).digest('base64');
+function maxExp(n) {
+	let m = n&(n-1);
+	if(m == 0) {
+		return n;
+	}
+	return maxExp(m);
 }
 
-var password = '12345';
 
-const N = 10000000;
-
-console.time('cryption');
-for(let i=0; i<N; i++) {
-	password = cryptPwd(password);
+for(let i=0; i<100; i++) {
+	console.log(maxExp(i), i);
 }
-console.log(password);
-console.timeEnd('cryption');
+

@@ -30,6 +30,101 @@ function insAndOuts(gamemap){
 	return true;
 }
 
+const Vertex = function(value, countries, position) {
+	this.value = value;
+	this.countries = countries;
+	this.position = position;
+	this.deinitCbs = [];
+}
+Vertex.prototype.deinit = function() {
+	for(let fn of this.deinitCbs) {
+		fn();
+	}
+	this.deinitCbs = [];
+}
+const Country = function(flag) {
+	this.flag = flag;
+	this.vertices = [];
+}
+
+const World = {countries: [], map: []};
+
+function initWorldMap(g, {I, O, E}) {
+	let flag = 1;
+	for(let r=0; r<g.length; r++) {
+		World.map[r] = [];
+		for(let c=0; c<g[r].length; c++) {
+			let v = g[r][c];
+			if(v == I) {
+				let country = new Country(flag);
+				World.map[r][c] = new Vertex(v, [country], [r,c]);
+				country.vertices.push(World.map[r][c]);
+				World.countries[flag] = country;
+				flag++;
+			} else {
+				World.map[r][c] = new Vertex(v, [], [r,c]);
+			}
+		}
+	}
+	for(let country of World.countries) {
+		for(let vertex of country.vertices) {
+			let [r,c] = vertex.position;
+			[-1,0,1].forEach(x=>[-1,0,1].forEach(y=> {
+				if(g[r+x] && g[r+x][c+y] == E) {
+					World.map[r+x][c+y].countries.push(country);
+					country.push(World.map[r+x][c+y]);
+				}
+			}));
+		}
+	}
+}
+
+/*
+/*
+ * IVertex {
+ *	 [x,y]
+ *	 neighbors: {group: Edge}
+ * }
+ *
+ * EVertex {
+ *	presentEdges: [Edge];
+ *	remove()
+ * }
+ *
+ * Edge {
+ *	[IVertex, EVertices, IVertex]
+ *	IVertex1
+ *	IVertex2
+ *	remove()
+ * }
+
+
+function initialize(g, {I,O,E}={}) {
+	groups = 0;
+	g.vertices = [];
+	g.groups = [];
+	for(let r=0; r<g.length; r++) {
+		for(let c=0; c<g[r].length; c++) {
+			if(g[r][c] == I) {
+				g.groups.push([[r,c]]);
+				g[r][c] = {
+					value: I,
+					group: g.groups.length-1
+				}
+			} else {
+				g[r][c] = {value: g[r][c]}
+			}
+		}
+	}
+}
+
+function explore(g, {I,O,E}) {
+	function()
+}
+
+function getIs(g, {I,O,E}={}) {
+}
+
 function maySolve(g) {
 	let blocksGraph = g.map(r=>r.map(e=>e=='I' ? 0 : 1));
 	//return pathsOf(blocksGraph);
@@ -145,7 +240,6 @@ function findMaxTree(g, {include, exclude, empty, visited, cache}={}) {
 		 * [-1,-1]  [-1,0]  [-1,1]
 		 * [0,-1]	[0,0]   [0, 1]
 		 * [1,-1]   [1,0]   [1,1]
-		 */
 		let vnum = [[[0,-1],[-1,-1],[-1,0]], [[-1,0],[-1,1],[0,1]],
 			[[0,1],[1,1],[1,0]], [[1,0],[1,-1],[0,-1]]]
 			.reduce((a,group)=>group.some(([x,y])=>vi(r+x,c+y)) ? a-1:a,4);
@@ -204,6 +298,19 @@ I I I I O E E
                
  I I O O I I I 
                  `;
+let gm0 = `
+O O I I E I E E
+I O I I I E O I
+I E E I O E O E
+I I O E I E O I
+E I O I I E E I
+O I O E E I E O
+E E O E O O E E
+I E O I O I E O
+`;
+
 let res = insAndOuts(gm);
 //console.log(res ? res.join('\n') : res);
 console.log(res);
+
+*/
