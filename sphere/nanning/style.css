@@ -160,7 +160,7 @@ body.fullscreen-enabled #fullscreenToggle {
 #toggleDeviceOrientation {
   position: absolute;
   top: 0;
-  left: 0;
+  right: 10;
   width: 40px;
   height: 40px;
   padding: 5px;
@@ -182,15 +182,8 @@ body.fullscreen-enabled #fullscreenToggle {
 body.fullscreen-enabled #autorotateToggle {
   right: 40px;
 }
-body.fullscreen-enabled #toggleDeviceOrientation {
-  left: 40px;
-}
-
 body.fullscreen-enabled.mobile #autorotateToggle {
   right: 50px;
-}
-body.fullscreen-enabled.mobile #toggleDeviceOrientation {
-  left: 50px;
 }
 
 #autorotateToggle .icon {
@@ -201,10 +194,10 @@ body.fullscreen-enabled.mobile #toggleDeviceOrientation {
   height: 30px;
 }
 
-#toggleDeviceOrientation img {
+#toggleDeviceOrientation .icon {
   position: absolute;
   top: 5px;
-  left: 5px;
+  right: 5px;
   width: 30px;
   height: 30px;
 }
@@ -214,9 +207,9 @@ body.fullscreen-enabled.mobile #toggleDeviceOrientation {
   right: 10px;
 }
 
-.mobile #toggleDeviceOrientation img {
+.mobile #toggleDeviceOrientation .icon {
   top: 10px;
-  left: 10px;
+  right: 10px;
 }
 
 #autorotateToggle .icon.on {
@@ -864,14 +857,14 @@ body.view-control-buttons .viewControlButton {
   margin-left: 105px;
 }
 
-#toggleDeviceOrientation .disable {
+#toggleDeviceOrientation .off {
   display: none;
 }
 
-#toggleDeviceOrientation.enabled .disable {
+#toggleDeviceOrientation.enabled .off {
   display: block;
 }
 
-#toggleDeviceOrientation.enabled .enable {
+#toggleDeviceOrientation.enabled .on {
   display: none;
 }

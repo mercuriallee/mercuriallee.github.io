@@ -29,6 +29,7 @@
   var sceneListToggleElement = document.querySelector('#sceneListToggle');
   var autorotateToggleElement = document.querySelector('#autorotateToggle');
   var fullscreenToggleElement = document.querySelector('#fullscreenToggle');
+  var toggleDeviceOrientation = document.querySelector('#toggleDeviceOrientation');
 
   // Detect desktop or mobile mode.
   if (window.matchMedia) {
@@ -188,18 +189,18 @@
 			function enable() {
 			  deviceOrientationControlMethod.getPitch(function(err, pitch) {
 				if (!err) {
-				  view.setPitch(pitch);
+				  viewer.scene().view().setPitch(pitch);
 				} 
 			  });
 			  controls.enableMethod('deviceOrientation');
 			  enabled = true;
-			  toggleElement.className = 'enabled';
+			  toggleElement.classList.add('enabled');
 			}
 
 			function disable() {
 			  controls.disableMethod('deviceOrientation');
 			  enabled = false;
-			  toggleElement.className = '';
+			  toggleElement.classList.remove('enabled');
 			}
 
 			function toggle() {
@@ -259,6 +260,7 @@
   }
 
   function startAutorotate() {
+	  return;
     if (!autorotateToggleElement.classList.contains('enabled')) {
       return;
     }
@@ -267,6 +269,7 @@
   }
 
   function stopAutorotate() {
+	  return;
     viewer.stopMovement();
     viewer.setIdleMovement(Infinity);
   }
