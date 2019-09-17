@@ -9,34 +9,40 @@ import {
 
 export default class sphere extends React.Component {
   state = {showPanel: true};
-  togglePanel = ()=>{ this.setState({showPanel: !this.state.showPanel})};
+  togglePanel = ()=>{
+	  this.setState({showPanel: !this.state.showPanel})
+  };
   render() {
-	  return this.state.showPanel ? (
-		  <VrButton style={styles.panel} onClick={this.togglePanel}>
-			<VrButton style={styles.selection}>
+	  return (
+		  <View 
+			style = {{
+			  width: 600,
+			  height: 450,
+			  backgroundColor: `rgba(255, 255, 255, ${this.state.showPanel ? 0.4 : 0})`, 
+			  alignItems: 'center',
+			  justifyContent: 'space-between'
+			}}
+			  onInput={e=>e.nativeEvent.inputEvent.action == 'down' && this.togglePanel()}
+		  >
+		    {this.state.showPanel && (
+				<VrButton style={styles.selection}>
 			  <Text style={{fontSize: 30}}> 
 				SELECT PIC 
-			</Text>
+			  </Text>
 			</VrButton>
+			)}
 			
+		    {this.state.showPanel && (
 			<Text style={styles.info}>
 			  click Button to change panadrama picture to view.
 			  Touch here to hide..
 			</Text>
-		  </VrButton>
-	) : null;
-  }
+			)}
+	    </View>
+	  )}
 };
 
 const styles = StyleSheet.create({
-  panel: {
-    // Fill the entire surface
-    width: 600,
-    height: 450,
-    backgroundColor: 'rgba(255, 255, 255, 0.4)',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
   selection: {
 	  top: '20%',
 	  width: 300,
