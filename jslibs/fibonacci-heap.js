@@ -31,11 +31,25 @@ FibonacciHeap.prototype.insert = function(value) {
 	}
 }
 
+FibonacciHeap.prototype.extractMin = function() {
+	let min = removeMin(this);
+	if(min.degree != 0) {
+		let cur = min.child, next;
+		for(let i=0; i<min.degree; i++) {
+			next = cur.left;
+			this.insert(cur);
+			cur = next;
+		}
+	}
+	this.consolidate();
+	return min.value;
+}
+
 FibonacciHeap.prototype.consolidate = function() {
 	if(this.min == null) return;
 	let cons = [], d = this.min.degree;
 	while(this.min != null) {
-		let p = this.removeMin();
+		let p = removeMin(this);
 		d = p.degree;
 		while(cons[d] != null) {
 			let c = cons[d];
@@ -65,15 +79,15 @@ FibonacciHeap.prototype.consolidate = function() {
 	head.left = pre, pre.right = head;
 }
 
-FibonacciHeap.prototype.removeMin = function() {
-	if(this.length == 0) return null;
-	let min = this.min;
-	if(this.length != 1) {
+function removeMin(heap) {
+	if(heap.length == 0) return null;
+	let min = heap.min;
+	if(heap.length != 1) {
 		let [left, right] = [min.left, min.right];
 		left.right = right, right.left = left;
 	}
-	this.length--;
-	this.min = this.length == 0 ? null : min.left;
+	heap.length--;
+	heap.min = heap.length == 0 ? null : min.left;
 	return min.left = min.right = min;
 }
 
@@ -158,7 +172,7 @@ FibonacciHeapNode.prototype.linkTo = function(node) {
 		this.left = this.right = this;
 	} else {
 		let [left, right] = [node.child.left, node.child];
-		left.right = right.left = this;
+		left.right = right.left = this; 
 		this.left = left, this.right = right;
 	}
 	this.parent = node;
@@ -170,7 +184,11 @@ function test() {
 	let h = new FibonacciHeap();
 	[...Array(20)].map((_,i)=>(i+1)*(i+1)*10).forEach(e=>h.insert(e));
 	h.consolidate();
+	h.extractMin();
+	h.extractMin();
+	h.extractMin();
 	console.log(h.print());
+
 }
 test();
 
