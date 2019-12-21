@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
+<html>
+	<head>
+				   <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+	</head>
+	<body>
+		<div id='graph', style="width:900px;height:600px;"></div>
+
+		<script>
+			let el = document.querySelector('#graph');
+			const d3 = Plotly.d3;
+			const line = d3.range(0, 1, 0.01);
+			const data = [
+				{
+					x: line.map(e=> e),
+					y: line.map(e=> -e*Math.log2(e)-(1-e)*Math.log2(1-e)),
+					name: 'entropy',
+					type: 'scatter'
+				},
+				{
+					x: line.map(e=> e),
+					y: line.map(e=> 2*(1-e**2-(1-e)**2)),
+					name: 'Gini',
+					type: 'scatter'
+				}
+			];
+		Plotly.plot(el, data);
+		</script>
+	</body>
+</html>
