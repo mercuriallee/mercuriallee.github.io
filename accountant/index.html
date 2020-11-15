@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<!-- xlsx.js (C) 2013-present  SheetJS http://sheetjs.com -->
+<!-- vim: set ts=2: -->
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+        <title>SheetJS Live Demo</title>
+        <style>
+#drop{
+    border:2px dashed #bbb;
+    -moz-border-radius:5px;
+    -webkit-border-radius:5px;
+    border-radius:5px;
+    padding:25px;
+    text-align:center;
+    font:20pt bold,"Vollkorn";color:#bbb
+}
+#b64data{
+    width:100%;
+}
+a { text-decoration: none }
+        </style>
+    </head>
+    <body>
+        <pre>
+<div id="drop">Drop a spreadsheet file here to see sheet data</div>
+<input type="file" name="xlfile" id="xlf" /> ... or click here to select a file
+
+<b>内账功能: </b>
+<select id='ia'> 
+    <option value='build-ias'>生成借收明细</option>
+</select>
+        </pre>
+        <pre id="out"></pre>
+        <div id="htmlout"></div>
+        <br />
+        <script src="./polyfill.js"></script>
+        <script src="./FileSaver.js"></script>
+        <script src="./exceljs.js"></script>
+        <script src="./accountant.js"></script>
+<script>
+
+            /*global XLSX */
+            var global_wb;
+
+var OUT = document.getElementById('out');
+var HTMLOUT = document.getElementById('htmlout');
+var IASelection = document.getElementById('ia');
+
+async function process_data(data) {
+    let wb = new ExcelJS.Workbook();
+    await wb.xlsx.load(data);
+    global_wb = wb;
+    var output = "";
+
+    function log(...arr) {
+        OUT.innerText = arr.join('\n');
+    }
+
+    let outWb;
+    if(IASelection.value == 'build-ias') {
+        outWb = await generateIASWorkbook({log, workbook:wb});
+    }
+    outWb.xlsx.writeBuffer()
+        .then( function (buffer) {
+            let d = new Date(),
+                y = d.getFullYear(),
+                m = ('0'+(d.getMonth() + 1)).substr(-2),
+                D = d.getDate(),
+                H = ('0'+d.getHours()).substr(-2),
+                M = ('0'+d.getMinutes()).substr(-2),
+                s = ('0'+d.getSeconds()).substr(-2);
+
+            saveAs(new Blob([buffer]), `exports_${y}${m}${D}${H}${M}${s}.xlsx`);
+            // build anchor tag and attach file (works in chrome)
+        })
+        .catch(function(error) {
+                console.log(error.message);
+            });
+
+    if(OUT.innerText === undefined) OUT.textContent = output;
+    else OUT.innerText = output;
+    if(typeof console !== 'undefined') console.log("output", new Date());
+};
+
+
+function do_file(files) {
+    var f = files[0];
+    var reader = new FileReader();
+    reader.onload = function(e) {
+        if(typeof console !== 'undefined') console.log("onload", new Date());
+        var data = e.target.result;
+        new Promise(_=> process_data(data));
+    };
+    reader.readAsArrayBuffer(f);
+};
+
+(function() {
+    var drop = document.getElementById('drop');
+    if(!drop.addEventListener) return;
+
+    function handleDrop(e) {
+        e.stopPropagation();
+        e.preventDefault();
+        do_file(e.dataTransfer.files);
+    }
+
+    function handleDragover(e) {
+        e.stopPropagation();
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'copy';
+    }
+
+    drop.addEventListener('dragenter', handleDragover, false);
+    drop.addEventListener('dragover', handleDragover, false);
+    drop.addEventListener('drop', handleDrop, false);
+})();
+
+(function() {
+    var xlf = document.getElementById('xlf');
+    if(!xlf.addEventListener) return;
+    function handleFile(e) { do_file(e.target.files); }
+    xlf.addEventListener('change', handleFile, false);
+})();
+
+        </script>
+    </body>
+</html>

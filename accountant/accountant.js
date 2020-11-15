@@ -1,6 +1,6 @@
-const Excel = require('exceljs');
+const Excel = ExcelJS;
 
-(function({log}) {
+var generateIASWorkbook = async function({log, workbook}) {
 
     const HeaderMaps = {id: '编号', time: '时间', revNum: '收入金额', desc: '明细', revName: '收款人', agent: '经手人', note: '备注'};
     const MustHave = ['编号', '时间', '收入金额', '明细', '收款人', '经手人', '备注'];
@@ -21,12 +21,11 @@ const Excel = require('exceljs');
     ];
     const TotalRowHeight = 30;
 
-    const wb = new Excel.Workbook();
+    let outputWb = await buildIASSheet(workbook);
 
     // Inner Accountant Summary
     async function buildIASSheet(workbook) {
         let wb = workbook;
-        await wb.xlsx.readFile('./test.xlsx');
 
         const dumpData = [];
         wb.eachSheet((sheet, _) => {
@@ -204,11 +203,5 @@ const Excel = require('exceljs');
         }
     }
 
-    new Promise((res)=>{res(buildIASSheet(wb))}).then(wb=> {
-        return new Promise(_=> {
-            wb.xlsx.writeFile('output.xlsx');
-        });
-    });
-})({log: function(...out) {
-    console.log(...out);
-}});
+    return outputWb;
+};
