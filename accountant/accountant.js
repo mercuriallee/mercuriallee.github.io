@@ -11,9 +11,11 @@ var generateIASWorkbook = async function({log, workbook}) {
     const ClassHeaderRowHeight = 25;
     const ContentRowHeight = 25;
     const BlankRowHeight = 25;
+
+    const TotalRowFont = { name: 'Arial Black', size: 12 };
     const OutputSheetColumns = [
         {key: 'revName', header: '借款人', width: 20},
-        {key: 'time', header: '时间', width: 10},
+        {key: 'time', header: '时间', width: 12, style: {numFmt: 'yyyy.mm.dd'}},
         {key: 'revNum', header: '金额', width: 15},
         {key: '', header: '事由', width: 10},
         {key: 'agent', header: '经手人', width: 10},
@@ -53,9 +55,6 @@ var generateIASWorkbook = async function({log, workbook}) {
             if(headerNotFound) {
                 return;
             }
-
-            // remove header row.
-            sheet.spliceRows(1, 1);
 
             sheet.eachRow((row, rowNum) => {
                 let data = {};
@@ -128,6 +127,14 @@ var generateIASWorkbook = async function({log, workbook}) {
             cell.value = cls;
             cell.style.fill = {type: 'pattern', pattern: 'solid', fgColor: {argb: 'FFE3EBCC'}};
 
+            for(let col=1; col<=OutputSheetColumns.length; col++) {
+                let cell = outSheet.getRow(curRow).getCell(col);
+                cell.value = cell._column.header;
+                cell.style.fill = {type: 'pattern', pattern: 'solid', fgColor: {argb: 'FFE3EBCC'}};
+            }
+            outSheet.getRow(curRow).height = ClassHeaderRowHeight;
+            curRow++;
+
             // content rows.
             let totalStartAddress = outSheet.getRow(curRow).getCell('revNum').address;
             for(let {revName, time, revNum, agent, note} of dict[cls]) {
@@ -143,6 +150,7 @@ var generateIASWorkbook = async function({log, workbook}) {
             curRow += 1;
             // total row.
             outSheet.getRow(curRow).style.fill = {type: 'pattern', pattern: 'solid', fgColor: {argb: 'FFFFFF00'}};
+            outSheet.getRow(curRow).style.font = TotalRowFont;
             outSheet.getRow(curRow).values = {
                 'revName': '总计', 'revNum': {formula: `SUM(${totalStartAddress}:${totalEndAddress})`}
             };
@@ -152,11 +160,13 @@ var generateIASWorkbook = async function({log, workbook}) {
 
         // end dict iterator.
         }
+
         // set alignment and border.
         for(let r=1; r < outSheet.rowCount; r++) {
             let row = outSheet.getRow(r);
             if(row.values.length == 0) {
                 row.height = BlankRowHeight;
+                outSheet.mergeCells(r, 1, r, outSheet.columnCount);
             }
             for(let c = 1; c <= OutputSheetColumns.length; c++) {
                 let style = row.getCell(c).style;
