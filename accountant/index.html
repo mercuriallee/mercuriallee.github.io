@@ -54,7 +54,9 @@ async function process_data(data) {
     var output = "";
 
     function log(...arr) {
-        OUT.innerText = arr.join('\n');
+        let output = arr.join('\n');;
+        if(OUT.innerText === undefined) OUT.textContent += '\n'+output;
+        else OUT.innerText += '\n'+output;
     }
 
     let outWb;
@@ -78,8 +80,6 @@ async function process_data(data) {
                 console.log(error.message);
             });
 
-    if(OUT.innerText === undefined) OUT.textContent = output;
-    else OUT.innerText = output;
     if(typeof console !== 'undefined') console.log("output", new Date());
 };
 

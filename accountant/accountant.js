@@ -57,6 +57,8 @@ var generateIASWorkbook = async function({log, workbook}) {
             }
 
             sheet.eachRow((row, rowNum) => {
+                // skip head row.
+                if(rowNum == 1) return;
                 let data = {};
                 let TimeValid = true;
                 row.eachCell((cell, _)=> {
@@ -65,15 +67,19 @@ var generateIASWorkbook = async function({log, workbook}) {
                         try {
                             value = parseDate(value);
                         }catch(err) {
-                            log(`表《${row._worksheet.name}》，第${rowNum}行，编号${row.getCell('id')}，时间格式有误，已舍弃.`);
                             TimeValid = false;
                         }
-                    }
+                        if(toString.apply(value) != '[object Date]') {
+                            TimeValid = false;
+                        }
+                    } 
                     data[key] = value;
                 })
                 if(!TimeValid) {
+                    log(`表《${row._worksheet.name}》，第${rowNum}行，编号${row.getCell('id')}，时间格式有误，已舍弃.`);
                     return;
                 }
+                log(row.getCell(2), TimeValid);
 
                 // check if MustNotNull's columns fullfill.
                 for(let key in HeaderMaps) {
@@ -196,15 +202,15 @@ var generateIASWorkbook = async function({log, workbook}) {
                     str = object.trim();
                 for(let reg of regs) {
                     let res = str.match(reg);
+                    let date = null;
                     let year, month, day;
                     if(res != null) {
-                        [year, month, day] = res;
-                    }
-                    let date = new Date(1970, 0, 1);
-                    try{
-                        date = new Date(year, month-1, day);
-                    } catch(err) {
-                        throw err;
+                        [, year, month, day] = res;
+                        try{
+                            date = new Date(year, month-1, day);
+                        } catch(err) {
+                            throw err;
+                        }
                     }
                     return date;
                 }
