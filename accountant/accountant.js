@@ -12,7 +12,7 @@ var generateIASWorkbook = async function({log, workbook}) {
     const ContentRowHeight = 25;
     const BlankRowHeight = 25;
 
-    const TotalRowFont = { name: 'Arial Black', size: 12 };
+    const TotalRowFont = { name: 'Arial Black', size: 12, bold: true };
     const OutputSheetColumns = [
         {key: 'revName', header: '借款人', width: 20},
         {key: 'time', header: '时间', width: 12, style: {numFmt: 'yyyy.mm.dd'}},
@@ -22,6 +22,8 @@ var generateIASWorkbook = async function({log, workbook}) {
         {key: 'note', header: '备注', width: 20},
     ];
     const TotalRowHeight = 30;
+    const RevTotalRowHeight = 25;
+    const RevTotalRowFont = {size: 11, bold: true, italic: true, color: {argb: 'FFFF0000'}};
 
     let outputWb = await buildIASSheet(workbook);
 
@@ -69,17 +71,13 @@ var generateIASWorkbook = async function({log, workbook}) {
                         }catch(err) {
                             TimeValid = false;
                         }
-                        if(toString.apply(value) != '[object Date]') {
-                            TimeValid = false;
-                        }
                     } 
                     data[key] = value;
                 })
                 if(!TimeValid) {
-                    log(`表《${row._worksheet.name}》，第${rowNum}行，编号${row.getCell('id')}，时间格式有误，已舍弃.`);
+                    log(`表《${row._worksheet.name}》，第${rowNum}行，编号${row.getCell('id')}，时间格式有误，已舍弃(${JSON.stringify(row.getCell('time').value)}).`);
                     return;
                 }
-                log(row.getCell(2), TimeValid);
 
                 // check if MustNotNull's columns fullfill.
                 for(let key in HeaderMaps) {
@@ -143,12 +141,30 @@ var generateIASWorkbook = async function({log, workbook}) {
 
             // content rows.
             let totalStartAddress = outSheet.getRow(curRow).getCell('revNum').address;
-            for(let {revName, time, revNum, agent, note} of dict[cls]) {
+            for(let i=0, top=curRow, curRev=dict[cls][0].revName; i<dict[cls].length; i++) {
+                let {revName, time, revNum, agent, note} = dict[cls][i];
                 outSheet.getRow(curRow).values = {
                     revName, time, revNum, agent, note
                 };
                 outSheet.getRow(curRow).height = ContentRowHeight;
                 curRow++;
+
+                //rev summary row.
+                if(i+1 == dict[cls].length || curRev != dict[cls][i+1].revName) {
+                    outSheet.getRow(curRow).style.fill = {type: 'pattern', pattern: 'solid', fgColor: {argb: 'FFEFEFEF'}};
+                    outSheet.getRow(curRow).style.font = RevTotalRowFont;
+                    let topAddress    = outSheet.getRow(top).getCell('revNum').address,
+                        bottomAddress = outSheet.getRow(curRow-1).getCell('revNum').address;
+                    outSheet.getRow(curRow).values = {
+                        'revName': '总计', 'revNum': {formula: `SUBTOTAL(109, ${topAddress}:${bottomAddress})`}
+                    };
+                    outSheet.getRow(curRow).height = RevTotalRowHeight;
+                    if(i+1 < dict[cls].length) {
+                        curRev = dict[cls][i+1].revName;
+                    }
+                    curRow++;
+                    top = curRow;
+                }
             }
             let totalEndAddress = outSheet.getRow(curRow).getCell('revNum').address;
 
@@ -158,7 +174,7 @@ var generateIASWorkbook = async function({log, workbook}) {
             outSheet.getRow(curRow).style.fill = {type: 'pattern', pattern: 'solid', fgColor: {argb: 'FFFFFF00'}};
             outSheet.getRow(curRow).style.font = TotalRowFont;
             outSheet.getRow(curRow).values = {
-                'revName': '总计', 'revNum': {formula: `SUM(${totalStartAddress}:${totalEndAddress})`}
+                'revName': '总计', 'revNum': {formula: `SUBTOTAL(109, ${totalStartAddress}:${totalEndAddress})`}
             };
             outSheet.getRow(curRow).height = TotalRowHeight;
             // two blank row.
@@ -193,7 +209,7 @@ var generateIASWorkbook = async function({log, workbook}) {
                 return object;
             }
             if(typeof(object) == 'number') {
-                return parseDate(object+'');
+                return object;
             }
             if(typeof object == 'string') {
                 let regs = [/^(\d{4})(\d{2})(\d{2})$/,
