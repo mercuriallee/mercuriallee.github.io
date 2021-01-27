@@ -2,7 +2,7 @@ const Excel = ExcelJS;
 
 var generateIASWorkbook = async function({log, workbook}) {
 
-    const HeaderMaps = {id: '编号', time: '时间', revNum: '收入金额', desc: '明细', revName: '收款人', agent: '经手人', note: '备注'};
+    const HeaderMaps = {id: '编号', time: '时间', revNum: '收入金额', desc: '明细', revName: '收款人', agent: '经手人', note: '备注', fapiao: '发票'};
     const MustHave = ['编号', '时间', '收入金额', '明细', '收款人', '经手人', '备注'];
     const MustNotNull = ['编号', '时间', '收入金额', '收款人'];
     const OutputSheetName = '借收明细';
@@ -19,6 +19,7 @@ var generateIASWorkbook = async function({log, workbook}) {
         {key: 'revNum', header: '金额', width: 15},
         {key: '', header: '事由', width: 10},
         {key: 'agent', header: '经手人', width: 10},
+        {key: 'fapiao', header: '发票', width: 10},
         {key: 'note', header: '备注', width: 20},
     ];
     const TotalRowHeight = 30;
@@ -142,9 +143,9 @@ var generateIASWorkbook = async function({log, workbook}) {
             // content rows.
             let totalStartAddress = outSheet.getRow(curRow).getCell('revNum').address;
             for(let i=0, top=curRow, curRev=dict[cls][0].revName; i<dict[cls].length; i++) {
-                let {revName, time, revNum, agent, note} = dict[cls][i];
+                let {revName, time, revNum, agent, note, fapiao} = dict[cls][i];
                 outSheet.getRow(curRow).values = {
-                    revName, time, revNum, agent, note
+                    revName, time, revNum, agent, note, fapiao
                 };
                 outSheet.getRow(curRow).height = ContentRowHeight;
                 curRow++;
