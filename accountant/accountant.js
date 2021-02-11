@@ -13,6 +13,7 @@ var generateIASWorkbook = async function({log, workbook}) {
     const BlankRowHeight = 25;
 
     const TotalRowFont = { name: 'Arial Black', size: 12, bold: true };
+    const TotalSummaryFont = { name: 'Arial Black', size: 14, bold: true };
     const OutputSheetColumns = [
         {key: 'revName', header: '借款人', width: 20},
         {key: 'time', header: '时间', width: 12, style: {numFmt: 'yyyy.mm.dd'}},
@@ -23,6 +24,7 @@ var generateIASWorkbook = async function({log, workbook}) {
         {key: 'note', header: '备注', width: 20},
     ];
     const TotalRowHeight = 30;
+    const TotalSummaryHeight = 35;
     const RevTotalRowHeight = 25;
     const RevTotalRowFont = {size: 11, bold: true, italic: true, color: {argb: 'FFFF0000'}};
 
@@ -51,7 +53,7 @@ var generateIASWorkbook = async function({log, workbook}) {
                     headerNotFound = false;
                     return;
                 }
-            // end cell iterator.
+                // end cell iterator.
             });
 
             // header not fullfill, invalid sheet.
@@ -184,8 +186,18 @@ var generateIASWorkbook = async function({log, workbook}) {
         // end dict iterator.
         }
 
+        // total summary row.
+        outSheet.getRow(curRow).style.fill = {type: 'pattern', pattern: 'solid', fgColor: {argb: 'FFFFFF00'}};
+        outSheet.getRow(curRow).style.font = TotalSummaryFont;
+        outSheet.getRow(curRow).values = {
+            'revName': '总计', 'revNum': {formula: `SUBTOTAL(109, ${outSheet.getRow(1).getCell('revNum').address}:${outSheet.getRow(curRow-1).getCell('revNum').address})`}
+        };
+        outSheet.getRow(curRow).height = TotalSummaryHeight;
+        // two blank row.
+        curRow += 2;
+
         // set alignment and border.
-        for(let r=1; r < outSheet.rowCount; r++) {
+        for(let r=1; r <= outSheet.rowCount; r++) {
             let row = outSheet.getRow(r);
             if(row.values.length == 0) {
                 row.height = BlankRowHeight;
