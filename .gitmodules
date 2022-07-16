@@ -1,3 +1,6 @@
 [submodule "my-mind"]
 	path = my-mind
 	url = https://github.com/mercuriallee/my-mind
+[submodule "tictactoe"]
+	path = tictactoe
+	url = ./tictactoe
