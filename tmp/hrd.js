@@ -343,23 +343,24 @@ Board.prototype.resolve = function({short} = {short: false}) {
 }
 
 let board = new Board({width: 4, height: 5, rects: [
-    new Rect(0, 0, 1, 2, 2, '赵云'),
-    new Rect(1, 0, 1, 1, 1, '卒'),
-    new Rect(2, 0, 1, 2, 2, '黄忠'),
-    new Rect(1, 1, 1, 1, 1, '卒'),
-    new Rect(3, 1, 1, 1, 1, '卒'),
-    new Rect(0, 2, 2, 2, 4, '曹操'),
-    new Rect(2, 2, 1, 2, 2, '马超'),
-    new Rect(3, 2, 1, 2, 2, '张飞'),
-    new Rect(0, 4, 2, 1, 3, '关羽'),
-    new Rect(2, 4, 1, 1, 1, '卒')
+    new Rect(0, 0, 1, 2, 2, '张飞'),
+    new Rect(1, 0, 2, 2, 4, '曹操'),
+    new Rect(3, 0, 1, 2, 2, '赵云'),
+    new Rect(0, 2, 1, 2, 2, '黄忠'),
+    new Rect(1, 2, 2, 1, 3, '关羽'),
+    new Rect(3, 2, 1, 2, 2, '马超'),
+    new Rect(1, 3, 1, 1, 1, '卒'),
+    new Rect(2, 3, 1, 1, 1, '卒'),
+    new Rect(0, 4, 1, 1, 1, '卒'),
+    new Rect(3, 4, 1, 1, 1, '卒')
 ]});
 
 //console.log(board.resolve());
 let initBoard = board.copy();
 let solution = board.resolve({short: true});
 console.log(solution.length);
-for(move of solution) {
+for(let i=0; i<solution.length; i++) {
+    let move = solution[i];
     let [ox, oy, tx, ty] = move;
     let postfix = '';
     if(tx-ox == 1) {
@@ -371,6 +372,6 @@ for(move of solution) {
     } else if(ty-oy == -1) {
         postfix = '上';
     }
-    console.log(board.rects[ox][oy].label+' '+postfix+'\n');
+    console.log((' '.repeat(3)+(i+1)+':  ').substr(-6)+board.rects[ox][oy].label+' '+postfix);
     board.applyMove(move, {inPlace: true});
 }
