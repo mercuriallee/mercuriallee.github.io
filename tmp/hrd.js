@@ -8,12 +8,13 @@
  * @param {[number]} height
  * @param {[number]} v
  */
-var Rect = function(x, y, width, height, v) {
+var Rect = function(x, y, width, height, v, label='') {
     this.x          = x;
     this.y          = y;
     this.width      = width;
     this.height     = height;
     this.v          = v;
+    this.label      = label;
 }
 
 /**
@@ -24,6 +25,7 @@ var Board = function({width, height, rects}) {
     this.width      = width;
     this.height     = height;
 
+    this._rects     = rects;
     this.rects      = Array(height).fill(0).map(_=>Array(width));
 
     for(let rect of rects) {
@@ -33,6 +35,75 @@ var Board = function({width, height, rects}) {
                 this.rects[x+dx][y+dy]  = rect;
             }
         }
+    }
+}
+
+/**
+ * @class
+ * @param {[Object]} nodes
+ */
+var Tree = function(nodes) {
+    this.root = null;
+    this.size = 0;
+    nodes.forEach(n=>this.push(n));
+}
+
+/**
+ * @param {Object} data
+ * @return {void}
+ */
+Tree.prototype.push = function(data) {
+    if(this.root == null) {
+        this.root = {data: data, left: null, right: null, parent: null};
+    } else {
+        let current = this.root;
+        while(current != null) {
+            if(data.value <= current.data.value) {
+                if(current.left == null) {
+                    current.left = {data: data, left: null, right: null, parent: current};
+                    break;
+                } else {
+                    current = current.left;
+                    continue;
+                }
+            } else {
+                if(current.right == null) {
+                    current.right = {data: data, left: null, right: null, parrent: current};
+                    break;
+                } else {
+                    current = current.right;
+                }
+            }
+        }
+    }
+    this.size++;
+}
+
+/**
+ * @return {Object}
+ */
+Tree.prototype.pop = function() {
+    let min;
+    if(this.root?.left == null) {
+        min = this.root?.data;
+        this.root = this.root?.right;
+        if(this.root?.right?.parent) this.root.right.parent = null;
+        this.size = Math.max(0, this.size-1);
+        return min;
+    } else {
+        let leftest = this.root; 
+        while(leftest.left != null) {
+            leftest = leftest.left;
+        }
+        min = leftest.data;
+        if(leftest.right?.parent) {
+            leftest.right.parent = leftest.parent;
+        }
+        if(leftest.parent?.left) {
+            leftest.parent.left = leftest.right;
+        }
+        this.size--;
+        return min;
     }
 }
 
@@ -119,25 +190,38 @@ Board.prototype.nextMoves = function() {
     return moves;
 }
 
-Board.prototype.applyMove = function(move) {
-    if(this.movable(move) == false) {
-        console.log("Cannot apply move:"+move+' !');
-        return false;
+/**
+ * @return {Board}
+ */
+Board.prototype.copy = function() {
+    let rects = this._rects.map(({x,y,width:w,height:h,v})=>new Rect(x,y,w,h,v));
+    return new Board({width: this.width, height: this.height, rects});
+}
+
+/**
+ * @param {number} move
+ * @return {Board}
+ */
+Board.prototype.applyMove = function(move, {inPlace}={inPlace: false}) {
+    let board = inPlace ? this : this.copy();
+    if(board.movable(move) == false) {
+        throw new Error("Cannot apply move:"+move+' !');
     }
     let [ox, oy, tx, ty] = move;
-    let rect = this.getRect(ox, oy);
+    let rect = board.getRect(ox, oy);
     for(let dx=0; dx<rect.width; dx++) {
         for(let dy=0; dy<rect.height; dy++) {
-            this.rects[ox+dx][oy+dy] = null;
+            board.rects[ox+dx][oy+dy] = null;
         }
     }
     for(let dx=0; dx<rect.width; dx++) {
         for(let dy=0; dy<rect.height; dy++) {
-            this.rects[tx+dx][ty+dy] = rect;
+            board.rects[tx+dx][ty+dy] = rect;
         }
     }
     rect.x = tx, rect.y = ty;
-    return true;
+
+    return board;
 }
 
 Board.prototype.ifSuccess = function() {
@@ -147,7 +231,7 @@ Board.prototype.ifSuccess = function() {
 /**
  * @return {string,boolean}
  */
-Board.prototype.resolve = function() {
+Board.prototype.backtrackResolve = function() {
     const FailsCache = {};
     let states = [{nexts: this.nextMoves(), lastMove: [], undo: null}], solved = false;
     backtrack: while(true) {
@@ -172,10 +256,10 @@ Board.prototype.resolve = function() {
         travel_moves: while(nexts.length) {
             let move = nexts.pop();
             [ox, oy, tx, ty] = move;
-            this.applyMove(move);
+            this.applyMove(move, {inPlace: true});
             let key = this.getValue();
             if(FailsCache[key] != null && FailsCache[key] != 0) {
-                this.applyMove([tx, ty, ox, oy]);
+                this.applyMove([tx, ty, ox, oy], {inPlace: true});
                 continue travel_moves;
             } else {
                 ifMoved = true;
@@ -196,7 +280,7 @@ Board.prototype.resolve = function() {
 
         //留
         state.undo = (function() {
-            this.applyMove([tx, ty, ox, oy]);
+            this.applyMove([tx, ty, ox, oy], {inPlace: true});
         }).bind(this);
 
         //进
@@ -210,17 +294,83 @@ Board.prototype.resolve = function() {
     return false;
 }
 
+/**
+ * @return {boolean, string}
+ */
+Board.prototype.shortestPathResolve = function() {
+    let visiteds = {}, successNode = null;
+    visiteds[this.getValue()] = {value: 0, moves: [], board: this.copy()};
+    let extents = this.nextMoves().map(move=> ({value:1, moves:[move.slice()], board: this.applyMove(move)}));
+    let extentsTree = new Tree(extents);
+    find_nearest: while(true) {
+        let nearest = extentsTree.pop();
+        if(nearest == null) break find_nearest;
+        let {value, moves, board} = nearest;
+        let nextMoves = board.nextMoves();
+        for(nextMove of nextMoves) {
+            ///@type {Board}
+            let neighbor = board.applyMove(nextMove, {inPlace: false});
+            let key = neighbor.getValue(), visited = visiteds[key];
+            if(visited != null) {
+                if(visited.value > value+1) {
+                    visiteds[key] = {value: value+1, moves: [...moves, nextMove.slice()], board: neighbor};
+                }
+            } else {
+                visiteds[key] = {value: value+1, moves: [...moves, nextMove.slice()], board: neighbor};
+                extentsTree.push({value: value+1, moves: [...moves, nextMove.slice()], board: neighbor});
+            }
+            if(neighbor.ifSuccess() == true) {
+                successNode = visiteds[key];
+                break find_nearest;
+            }
+        }
+    }
+    if(successNode != null) {
+        return successNode.moves;
+    } 
+    return false;
+}
+
+/**
+ * @return {boolean, string}
+ */
+Board.prototype.resolve = function({short} = {short: false}) {
+    if(short) {
+        return this.shortestPathResolve();
+    } else {
+        return this.backtrackResolve();
+    }
+}
+
 let board = new Board({width: 4, height: 5, rects: [
-    new Rect(0, 0, 1, 2, 2),
-    new Rect(1, 0, 1, 1, 1),
-    new Rect(2, 0, 1, 2, 2),
-    new Rect(1, 1, 1, 1, 1),
-    new Rect(3, 1, 1, 1, 1),
-    new Rect(0, 2, 2, 2, 4),
-    new Rect(2, 2, 1, 2, 2),
-    new Rect(3, 2, 1, 2, 2),
-    new Rect(0, 4, 2, 1, 3),
-    new Rect(2, 4, 1, 1, 1)
+    new Rect(0, 0, 1, 2, 2, '赵云'),
+    new Rect(1, 0, 1, 1, 1, '卒'),
+    new Rect(2, 0, 1, 2, 2, '黄忠'),
+    new Rect(1, 1, 1, 1, 1, '卒'),
+    new Rect(3, 1, 1, 1, 1, '卒'),
+    new Rect(0, 2, 2, 2, 4, '曹操'),
+    new Rect(2, 2, 1, 2, 2, '马超'),
+    new Rect(3, 2, 1, 2, 2, '张飞'),
+    new Rect(0, 4, 2, 1, 3, '关羽'),
+    new Rect(2, 4, 1, 1, 1, '卒')
 ]});
 
-console.log(board.resolve());
+//console.log(board.resolve());
+let initBoard = board.copy();
+let solution = board.resolve({short: true});
+console.log(solution.length);
+for(move of solution) {
+    let [ox, oy, tx, ty] = move;
+    let postfix = '';
+    if(tx-ox == 1) {
+        postfix = '右';
+    } else if(tx-ox == -1) {
+        postfix = '左';
+    } else if(ty-oy == 1) {
+        postfix = '下';
+    } else if(ty-oy == -1) {
+        postfix = '上';
+    }
+    console.log(board.rects[ox][oy].label+' '+postfix+'\n');
+    board.applyMove(move, {inPlace: true});
+}
