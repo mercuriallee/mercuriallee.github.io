@@ -83,7 +83,7 @@ Tree.prototype.push = function(data) {
  * @return {Object}
  */
 Tree.prototype.pop = function() {
-    let min;
+    let min, height=0;
     if(this.root?.left == null) {
         min = this.root?.data;
         this.root = this.root?.right;
@@ -93,8 +93,10 @@ Tree.prototype.pop = function() {
     } else {
         let leftest = this.root; 
         while(leftest.left != null) {
+            height++;
             leftest = leftest.left;
         }
+        console.log(height, this.size);
         min = leftest.data;
         if(leftest.right?.parent) {
             leftest.right.parent = leftest.parent;
@@ -298,7 +300,7 @@ Board.prototype.backtrackResolve = function() {
  * @return {boolean, string}
  */
 Board.prototype.shortestPathResolve = function() {
-    let visiteds = {}, successNode = null;
+    let visiteds = new Map, successNode = null;
     visiteds[this.getValue()] = {value: 0, moves: [], board: this.copy()};
     let extents = this.nextMoves().map(move=> ({value:1, moves:[move.slice()], board: this.applyMove(move)}));
     let extentsTree = new Tree(extents);
@@ -313,11 +315,11 @@ Board.prototype.shortestPathResolve = function() {
             let key = neighbor.getValue(), visited = visiteds[key];
             if(visited != null) {
                 if(visited.value > value+1) {
-                    visiteds[key] = {value: value+1, moves: [...moves, nextMove.slice()], board: neighbor};
+                    visiteds[key] = {value: value+1, moves: [...moves, nextMove], board: neighbor};
                 }
             } else {
-                visiteds[key] = {value: value+1, moves: [...moves, nextMove.slice()], board: neighbor};
-                extentsTree.push({value: value+1, moves: [...moves, nextMove.slice()], board: neighbor});
+                visiteds[key] = {value: value+1, moves: [...moves, nextMove], board: neighbor};
+                extentsTree.push({value: value+1, moves: [...moves, nextMove], board: neighbor});
             }
             if(neighbor.ifSuccess() == true) {
                 successNode = visiteds[key];
