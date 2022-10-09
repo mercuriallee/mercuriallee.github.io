@@ -83,7 +83,7 @@ Tree.prototype.push = function(data) {
  * @return {Object}
  */
 Tree.prototype.pop = function() {
-    let min, height=0;
+    let min;
     if(this.root?.left == null) {
         min = this.root?.data;
         this.root = this.root?.right;
@@ -93,10 +93,8 @@ Tree.prototype.pop = function() {
     } else {
         let leftest = this.root; 
         while(leftest.left != null) {
-            height++;
             leftest = leftest.left;
         }
-        console.log(height, this.size);
         min = leftest.data;
         if(leftest.right?.parent) {
             leftest.right.parent = leftest.parent;
