@@ -156,13 +156,35 @@ Board.prototype.movable = function(move) {
  * @param {number} y
  */
 Board.prototype.values = function(x, y) {
-    return this.getRect(x,y)?.v ?? 0;
+    return x<0||y<0||x>=this.width||y>=this.height ? null : (this.getRect(x,y)?.v ?? 0);
 }
 
 /**
  * @return {[[number]]}
  */
-Board.prototype.nextMoves = function() {
+Board.prototype.nextMoves = function({wideStep}={wideStep: false}) {
+    let board = this;
+    function nextMovesOfRect(rect, board, blockDirect) {
+        let moves = [];
+        for(let [dx, dy] of [[-1,0],[0,-1],[1,0],[0,1]]) {
+            if(blockDirect && blockDirect[0] == dx && blockDirect[1] == dy) continue;
+            let move = [rect.x, rect.y, rect.x+dx, rect.y+dy];
+            if(board.movable(move)) {
+                moves.push(move);
+                let nextBoard = board.applyMove(move, {inPlace: false});
+                if(wideStep) {
+                    let nextMoves = nextMovesOfRect(nextBoard.getRect(move[2], move[3]), nextBoard, [-dx, -dy]);
+                    nextMoves.forEach(([,, tx, ty])=> moves.push([move[0],move[1],tx,ty]));
+                }
+            }
+        }
+        return moves;
+    }
+    let moves = this._rects.reduce((ms, rect)=>(ms.push(...nextMovesOfRect(rect, board)), ms), []);
+    let cache={};
+    moves.forEach(e=>cache[e]=e);
+    return Object.values(cache);
+    /*
     let moves = [];
     for(let x=0; x<this.width; x++) {
         for(let y=0; y<this.height; y++) {
@@ -210,6 +232,7 @@ Board.prototype.nextMoves = function() {
     let cache = {};
     moves.forEach(move=>cache[move.join(',')]=move);
     return Object.values(cache);
+    */
 }
 
 /**
@@ -319,26 +342,24 @@ Board.prototype.backtrackResolve = function() {
  * @return {boolean, string}
  */
 Board.prototype.shortestPathResolve = function({wideStep}={wideStep: false}) {
-    let getKey = (board, lastMovedRect) => wideStep ? board.getValue() + '\n' + lastMovedRect?.id ?? null : board.getValue();
+    let getKey = board => board.getValue();
     let visiteds = new Map, successNode = null;
-    visiteds.set(getKey(this, null), {value: 0, moves: [], board: this.copy()});
-    let extentsTree = new Tree(this.nextMoves().map(move=> ({value:1, moves:[move.slice()], board: this.applyMove(move)})));
+    visiteds.set(getKey(this), {value: 0, moves: [], board: this.copy()});
+    let extentsTree = new Tree(this.nextMoves({wideStep}).map(move=> ({value:1, moves:[move.slice()], board: this.applyMove(move)})));
     find_nearest: while(true) {
         let nearest = extentsTree.pop();
         if(nearest == null) break find_nearest;
         let {moves, board} = nearest;
-        let lastMove = moves[moves.length-1], lastMovedRect = board.getRect(lastMove[2],lastMove[3]);
         if(board.ifSuccess() == true) {
-            successNode = visiteds.get(getKey(board, lastMovedRect));
+            successNode = visiteds.get(getKey(board));
             break find_nearest;
         }
-        let nextMoves = board.nextMoves();
+        let nextMoves = board.nextMoves({wideStep});
         for(nextMove of nextMoves) {
             ///@type {Board}
             let neighbor = board.applyMove(nextMove, {inPlace: false});
-            let key = getKey(neighbor, neighbor.getRect(nextMove[2], nextMove[3])), visited = visiteds.get(key);
-            let movingRect = board.getRect(nextMove[0], nextMove[1]);
-            let movesToNeighbor = wideStep && movingRect === lastMovedRect ? [...moves.slice(0, moves.length-1), [lastMove[0], lastMove[1], nextMove[2], nextMove[3]]] : [...moves, nextMove];
+            let key = getKey(neighbor), visited = visiteds.get(key);
+            let movesToNeighbor = [...moves, nextMove];
             let stepsToNeighbor = movesToNeighbor.length;
             let neighborNode = {value: stepsToNeighbor, moves: movesToNeighbor, board: neighbor};
             if(visited != null) {
@@ -412,7 +433,6 @@ let board = new Board({width: 4, height: 5, rects: [
     new Rect(3, 4, 1, 1, 1, '卒')
 ]});
 
-//console.log(board.resolve());
 let initBoard = board.copy();
 let solution = board.resolve({short: true, wideStep: true});
 console.log(solution.length);
