@@ -184,55 +184,6 @@ Board.prototype.nextMoves = function({wideStep}={wideStep: false}) {
     let cache={};
     moves.forEach(e=>cache[e]=e);
     return Object.values(cache);
-    /*
-    let moves = [];
-    for(let x=0; x<this.width; x++) {
-        for(let y=0; y<this.height; y++) {
-            if(this.values(x,y) == 0) {
-                let ox, oy, tx, ty, neighborRect;
-                if(x > 0) {
-                    neighborRect = this.getRect(x-1, y);
-                    if(neighborRect != null) {
-                        [ox, oy, tx, ty] = [neighborRect.x, neighborRect.y, neighborRect.x+1, neighborRect.y];
-                        if(this.movable([ox, oy, tx, ty])) {
-                            moves.push([ox, oy, tx, ty]);
-                        }
-                    }
-                }
-                if(x < this.width-1) {
-                    neighborRect = this.getRect(x+1, y);
-                    if(neighborRect != null) {
-                        [ox, oy, tx, ty] = [neighborRect.x, neighborRect.y, neighborRect.x-1, neighborRect.y];
-                        if(this.movable([ox, oy, tx, ty])) {
-                            moves.push([ox, oy, tx, ty]);
-                        }
-                    }
-                }
-                if(y > 0) {
-                    neighborRect = this.getRect(x, y-1);
-                    if(neighborRect != null) {
-                        [ox, oy, tx, ty] = [neighborRect.x, neighborRect.y, neighborRect.x, neighborRect.y+1];
-                        if(this.movable([ox, oy, tx, ty])) {
-                            moves.push([ox, oy, tx, ty]);
-                        }
-                    }
-                }
-                if(y < this.height-1) {
-                    neighborRect = this.getRect(x, y+1);
-                    if(neighborRect != null) {
-                        [ox, oy, tx, ty] = [neighborRect.x, neighborRect.y, neighborRect.x, neighborRect.y-1];
-                        if(this.movable([ox, oy, tx, ty])) {
-                            moves.push([ox, oy, tx, ty]);
-                        }
-                    }
-                }
-            }
-        }
-    }
-    let cache = {};
-    moves.forEach(move=>cache[move.join(',')]=move);
-    return Object.values(cache);
-    */
 }
 
 /**
@@ -420,18 +371,23 @@ Board.prototype.descriptSolutionByLabel = function(solution) {
     return output;
 }
 
-let board = new Board({width: 4, height: 5, rects: [
-    new Rect(1, 0, 2, 2, 4, '曹操'),
-    new Rect(0, 1, 1, 1, 1, '卒'),
-    new Rect(3, 1, 1, 1, 1, '卒'),
-    new Rect(0, 2, 1, 2, 2, '赵云'),
-    new Rect(1, 2, 2, 1, 3, '关羽'),
-    new Rect(3, 2, 1, 2, 2, '张飞'),
-    new Rect(1, 3, 2, 1, 3, '诸葛亮'),
-    new Rect(0, 4, 1, 1, 1, '卒'),
-    new Rect(1, 4, 2, 1, 3, '庞统'),
-    new Rect(3, 4, 1, 1, 1, '卒')
-]});
+let config = require('./hrd_levels/48.json'), board;
+if(config == null) {
+    board = new Board({width: 4, height: 5, rects: [
+        new Rect(0, 0, 1, 1, 4, '卒'),
+        new Rect(1, 0, 2, 1, 3, '关羽'),
+        new Rect(3, 0, 1, 1, 1, '卒'),
+        new Rect(0, 1, 1, 2, 2, '张飞'),
+        new Rect(1, 1, 2, 2, 4, '曹操'),
+        new Rect(3, 1, 1, 2, 2, '赵云'),
+        new Rect(0, 3, 2, 1, 3, '关羽'),
+        new Rect(2, 3, 2, 1, 3, '周仓'),
+        new Rect(0, 4, 1, 1, 1, '卒'),
+        new Rect(3, 4, 1, 1, 1, '卒')
+    ]});
+} else {
+    board = new Board({width: config.width, height: config.height, rects: config.rects.map(params=>new Rect(...params))});
+}
 
 let initBoard = board.copy();
 let solution = board.resolve({short: true, wideStep: true});
