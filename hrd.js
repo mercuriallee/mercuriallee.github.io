@@ -8,6 +8,21 @@
  * @param {[number]} height
  * @param {[number]} v
  */
+const GlobalHash = (function() {
+    let o = {};
+    o.count = 0;
+    o.map = new WeakMap;
+
+    return function(object) {
+        let hash = o.map.get(object);
+        if(hash == null) {
+            hash = o.count;
+            o.map.set(object, o.count++);
+        }
+        return hash;
+    }
+})();
+
 var Rect = function(x, y, width, height, v, label='', id) {
     this.x          = x;
     this.y          = y;
@@ -18,7 +33,7 @@ var Rect = function(x, y, width, height, v, label='', id) {
     this.id         = id;
 
     if(typeof(id)=='undefined'){
-        this.id     = Math.random();
+        this.id     = GlobalHash(this);
     }
 }
 
@@ -53,8 +68,8 @@ var Tree = function(nodes) {
     nodes.forEach(n=>this.push(n));
 }
 
-Tree.prototype.value = function(node) {
-    return node.value + (this.Tails.get(node) ?? (t=Math.random(), this.Tails.set(node, t), t));
+Tree.prototype.compare = function(node1, node2) {
+    return node1.value != node2.value ? node1.value - node2.value : GlobalHash(node1) - GlobalHash(node2);
 }
 
 /**
@@ -67,21 +82,20 @@ Tree.prototype.push = function(node) {
         return;
     }
 
-    let bottom = 0, top = this.nodes.length-1, mid=0, value=this.value.bind(this);
+    let bottom = 0, top = this.nodes.length-1, mid=0, compare=this.compare.bind(this);
     while(bottom < top) {
         mid = bottom + Math.floor((top-bottom)/2);
-        if(value(this.nodes[mid]) == value(node)) {
+        if(compare(this.nodes[mid], node) == 0) {
             debugger;
-            console.log(value(this.nodes[mid]), value(node));
             throw new Error("Tree cannot has same-weight-nodes.");
         }
-        if(value(this.nodes[mid]) < value(node)) {
+        if(compare(this.nodes[mid], node) < 0) {
             bottom = mid+1;
         } else {
             top = mid;
         }
     }
-    this.nodes.splice(value(this.nodes[bottom])>value(node)?bottom:bottom+1, 0, node);
+    this.nodes.splice(compare(this.nodes[bottom], node)>0 ?bottom:bottom+1, 0, node);
 }
 
 /**
@@ -93,20 +107,20 @@ Tree.prototype.pop = function() {
 
 Tree.prototype.remove = function(node) {
     if(this.nodes.length == 0) return false;
-    let bottom = 0, top = this.nodes.length-1, mid=0, value=this.value.bind(this);
+    let bottom = 0, top = this.nodes.length-1, mid=0, compare=this.compare.bind(this);
     while(bottom < top) {
         mid = bottom + Math.floor((top-bottom)/2);
-        if(value(this.nodes[mid]) === value(node)) {
+        if(compare(this.nodes[mid], node) == 0) {
             bottom = mid;
             break;
         }
-        if(value(this.nodes[mid]) < value(node)) {
+        if(compare(this.nodes[mid], node) < 0) {
             bottom = mid+1;
         } else {
             top = mid;
         }
     }
-    if(value(this.nodes[bottom]) === value(node)) {
+    if(compare(this.nodes[bottom], node) == 0) {
         this.nodes.splice(bottom,1);
         return true;
     } 
@@ -386,16 +400,16 @@ Board.prototype.descriptSolutionByLabel = function(solution) {
 }
 
 let board = new Board({width: 4, height: 5, rects: [
-    new Rect(0, 0, 1, 1, 1, '卒'),
-    new Rect(1, 0, 1, 1, 1, '卒'),
-    new Rect(2, 0, 1, 1, 1, '卒'),
-    new Rect(3, 0, 1, 2, 2, '赵云'),
-    new Rect(0, 1, 2, 2, 4, '曹操'),
-    new Rect(2, 1, 1, 2, 2, '马超'),
+    new Rect(1, 0, 2, 2, 4, '曹操'),
+    new Rect(0, 1, 1, 1, 1, '卒'),
+    new Rect(3, 1, 1, 1, 1, '卒'),
+    new Rect(0, 2, 1, 2, 2, '赵云'),
+    new Rect(1, 2, 2, 1, 3, '关羽'),
     new Rect(3, 2, 1, 2, 2, '张飞'),
-    new Rect(1, 3, 2, 1, 3, '关羽'),
-    new Rect(1, 4, 1, 1, 1, '卒'),
-    new Rect(2, 4, 2, 1, 3, '周仓')
+    new Rect(1, 3, 2, 1, 3, '诸葛亮'),
+    new Rect(0, 4, 1, 1, 1, '卒'),
+    new Rect(1, 4, 2, 1, 3, '庞统'),
+    new Rect(3, 4, 1, 1, 1, '卒')
 ]});
 
 //console.log(board.resolve());
