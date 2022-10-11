@@ -83,7 +83,7 @@ Tree.prototype.push = function(node) {
     }
 
     let bottom = 0, top = this.nodes.length-1, mid=0, compare=this.compare.bind(this);
-    while(bottom < top) {
+    while(bottom <= top) {
         mid = bottom + Math.floor((top-bottom)/2);
         if(compare(this.nodes[mid], node) == 0) {
             debugger;
@@ -92,10 +92,10 @@ Tree.prototype.push = function(node) {
         if(compare(this.nodes[mid], node) < 0) {
             bottom = mid+1;
         } else {
-            top = mid;
+            top = mid-1;
         }
     }
-    this.nodes.splice(compare(this.nodes[bottom], node)>0 ?bottom:bottom+1, 0, node);
+    this.nodes.splice(bottom, 0, node);
 }
 
 /**
@@ -108,22 +108,18 @@ Tree.prototype.pop = function() {
 Tree.prototype.remove = function(node) {
     if(this.nodes.length == 0) return false;
     let bottom = 0, top = this.nodes.length-1, mid=0, compare=this.compare.bind(this);
-    while(bottom < top) {
+    while(bottom <= top) {
         mid = bottom + Math.floor((top-bottom)/2);
         if(compare(this.nodes[mid], node) == 0) {
-            bottom = mid;
-            break;
+            this.nodes.splice(mid, 1);
+            return true;
         }
         if(compare(this.nodes[mid], node) < 0) {
             bottom = mid+1;
         } else {
-            top = mid;
+            top = mid-1;
         }
     }
-    if(compare(this.nodes[bottom], node) == 0) {
-        this.nodes.splice(bottom,1);
-        return true;
-    } 
     return false;
 }
 
@@ -371,7 +367,7 @@ Board.prototype.descriptSolutionByLabel = function(solution) {
     return output;
 }
 
-let config = require('./hrd_levels/normal.json'), board;
+let config = require('./hrd_levels/47.json'), board;
 if(config == null) {
     board = new Board({width: 4, height: 5, rects: [
         new Rect(0, 0, 1, 1, 4, '卒'),
