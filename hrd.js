@@ -371,7 +371,7 @@ Board.prototype.descriptSolutionByLabel = function(solution) {
     return output;
 }
 
-let config = require('./hrd_levels/50.json'), board;
+let config = require('./hrd_levels/normal.json'), board;
 if(config == null) {
     board = new Board({width: 4, height: 5, rects: [
         new Rect(0, 0, 1, 1, 4, '卒'),
