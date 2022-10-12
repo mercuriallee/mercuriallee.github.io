@@ -441,26 +441,11 @@ class Tree {
     }
 }
 
-let config = require('./hrd_levels/43.json'), board;
-if(config == null) {
-    board = new Board({width: 4, height: 5, rects: [
-        new Rect(0, 0, 1, 1, 4, '卒'),
-        new Rect(1, 0, 2, 1, 3, '关羽'),
-        new Rect(3, 0, 1, 1, 1, '卒'),
-        new Rect(0, 1, 1, 2, 2, '张飞'),
-        new Rect(1, 1, 2, 2, 4, '曹操'),
-        new Rect(3, 1, 1, 2, 2, '赵云'),
-        new Rect(0, 3, 2, 1, 3, '关羽'),
-        new Rect(2, 3, 2, 1, 3, '周仓'),
-        new Rect(0, 4, 1, 1, 1, '卒'),
-        new Rect(3, 4, 1, 1, 1, '卒')
-    ]});
+let config = require('./hrd_levels/normal.json'), board;
+if(typeof(config.eval) == 'string') {
+    board = Board.eval(config.eval);
 } else {
-    if(typeof(config.eval) == 'string') {
-        board = Board.eval(config.eval);
-    } else {
-        board = new Board({width: config.width, height: config.height, rects: config.rects.map(params=>new Rect(...params))});
-    }
+    board = new Board({width: config.width, height: config.height, rects: config.rects.map(params=>new Rect(...params))});
 }
 
 let initBoard = board.copy();
