@@ -66,6 +66,53 @@ class Board {
     }
 
     /**
+     * @param {string} str
+     * @return {Board}
+     */
+    static eval(str) {
+        const dict = {
+            '张飞': {aliases: ['x', 'X'], v: 2},
+            '马超': {aliases: ['c', 'C'], v: 2},
+            '赵云': {aliases: ['f', 'F'], v: 2},
+            '黄忠': {aliases: ['a', 'A'], v: 2},
+            '魏延': {aliases: ['t', 'T'], v: 2},
+            '关羽': {aliases: ['u', 'U'], v: 3},
+            '周仓': {aliases: ['m', 'M'], v: 3},
+            '孔明': {aliases: ['b', 'B'], v: 3},
+            '庞统': {aliases: ['y', 'Y'], v: 3},
+            '刘备': {aliases: ['j', 'J'], v: 3},
+            '曹操': {aliases: ['g', 'G'], v: 4},
+        };
+        debugger;
+        let arr = str.split(',').map(rowStr=>rowStr.split(''));
+        let height = arr.length, width = arr[0].length;
+        let rects = [];
+        let skips = [...Array(width+1)].map(_=> ({}));
+        for(let x=0; x<width; x++) {
+            for(let y=0; y<height; y++) {
+                if(skips[x][y]) continue;
+                let label = arr[y][x];
+                if(label == '0') continue;
+                if(label == '1') {
+                    rects.push(new Rect(x, y, 1, 1, 1, '卒'));
+                    continue;
+                }
+                for(let name in dict) {
+                    let {aliases, v} = dict[name];
+                    if(aliases.includes(label)) {
+                        if(v == 2) skips[x][y+1] = true;
+                        else if(v == 3) skips[x+1][y] = true;
+                        else if(v == 4) skips[x+1][y] = skips[x][y+1] = skips[x+1][y+1] = true;
+                        rects.push(new Rect(x, y, (v+1)/2|0, 2-v%2, v, name));
+                        continue;
+                    }
+                }
+            }
+        }
+        return new Board({width, height, rects});
+    }
+
+    /**
      * @return {string}
      */
     getValue() {
@@ -394,7 +441,7 @@ class Tree {
     }
 }
 
-let config = require('./hrd_levels/47.json'), board;
+let config = require('./hrd_levels/43.json'), board;
 if(config == null) {
     board = new Board({width: 4, height: 5, rects: [
         new Rect(0, 0, 1, 1, 4, '卒'),
@@ -409,7 +456,11 @@ if(config == null) {
         new Rect(3, 4, 1, 1, 1, '卒')
     ]});
 } else {
-    board = new Board({width: config.width, height: config.height, rects: config.rects.map(params=>new Rect(...params))});
+    if(typeof(config.eval) == 'string') {
+        board = Board.eval(config.eval);
+    } else {
+        board = new Board({width: config.width, height: config.height, rects: config.rects.map(params=>new Rect(...params))});
+    }
 }
 
 let initBoard = board.copy();
