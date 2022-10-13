@@ -30,17 +30,26 @@
  * by default only javascript markup and css languages are defined (also file extension
  * for them. To have more languages you need to include appropriate js files.
  *
- * Copyright (c) 2018 Jakub Jankiewicz <http://jcubic.pl/me>
+ * Copyright (c) 2018-2021 Jakub Jankiewicz <https://jcubic.pl/me>
  * Released under the MIT license
  *
  */
-/* global jQuery, Prism, define, global, require, module */
+/* global define */
 (function(factory, undefined) {
-    var root = typeof window !== 'undefined' ? window : global;
+    var root;
+    if (typeof window !== 'undefined') {
+        root = window;
+    } else if (typeof self !== 'undefined') {
+        root = self;
+    } else if (typeof global !== 'undefined') {
+        root = global;
+    } else {
+        throw new Error('Unknow context');
+    }
     if (typeof define === 'function' && define.amd) {
         // AMD. Register as an anonymous module.
         // istanbul ignore next
-        define(['prismjs', 'jquery', 'jquery.terminal'], factory);
+        define(['jquery', 'prismjs', 'jquery.terminal'], factory);
     } else if (typeof module === 'object' && module.exports) {
         // Node/CommonJS
         module.exports = function(root, jQuery, Prism) {
@@ -80,11 +89,11 @@
     }
     var _ = $.extend({}, Prism);
 
-    _.Token = function(type, content, alias, matchedStr, greedy) {
+    _.Token = function() {
         Token.apply(this, [].slice.call(arguments));
     };
-    _.Token.stringify = function(o, language, parent, recur) {
-        if (typeof o == 'string') {
+    _.Token.stringify = function(o, language, parent) {
+        if (typeof o === 'string') {
             return o;
         }
 
@@ -95,7 +104,6 @@
         }
 
         var env = {
-            type: o.type,
             content: _.Token.stringify(o.content, language, parent),
             tag: 'span',
             classes: ['token', o.type],
@@ -104,7 +112,7 @@
             parent: parent
         };
 
-        if (env.type == 'comment') {
+        if (env.type === 'comment') {
             env.attributes['spellcheck'] = 'true';
         }
 
@@ -117,7 +125,17 @@
 
         return env.content.split(/\n/).map(function(content) {
             if (content) {
-                return '\x00\x00\x00\x00[[b;;;' + env.classes.join(' ') + ']' + content + '\x00\x00\x00\x00]';
+                // escape nested non formatting
+                // so you can use like <script>alert("[[;red;]xxxx]");</script>
+                var parts = content.split(format_split_re).filter(Boolean);
+                content = parts.map(function(string) {
+                    if (!string.match(/^\x00/)) {
+                        return $.terminal.escape_brackets(string).replace(/\\/g, '&#92;');
+                    }
+                    return string;
+                }).join('');
+                return '\x00\x00\x00\x00[[b;;;' + env.classes.join(' ') + ']' +
+                    content + '\x00\x00\x00\x00]';
             }
             return '';
         }).join('\n');
@@ -128,11 +146,29 @@
     if (!$.terminal) {
         throw new Error('$.terminal is not defined');
     }
-    // we use 0x00 character so we know which one of the formatting came from prism so we can escape the reset
-    // because we unescape original values, the values need to be escape in cmd plugin so you can't type in
-    // formatting
-    var format_split_re = /(\x00\x00\x00\x00(?:\[\[[!gbiuso]*;[^;]*;[^\]]*\](?:[^\]]*[^\\](\\\\)*\\\][^\]]*|[^\]]*|[^[]*\[[^\]]*)\]?|\]))/i;
-    $.terminal.prism = function prism(language, string) {
+    // we use 0x00 character so we know which one of the formatting came from prism
+    // so we can escape the reset because we unescape original values, the values
+    // need to be escape in cmd plugin so you can't type in formatting
+    /* eslint-disable */
+    var format_split_re = /(\x00\x00\x00\x00(?:\[\[[!gbiuso]*;[^;]*;[^\]]*\](?:[^\]\\]*(\\\\)*\\\][^\]]*|[^\]]*|[^[]*\[[^\]]*)\]?|\]))/i;
+    /* eslint-enable */
+    function should_render(options) {
+        if (!options || !Object.keys(options).length) {
+            return true;
+        }
+        var props = Object.keys($.terminal.prism_formatters);
+        for (var i = props.length; i--;) {
+            var prop = props[i];
+            if (options[prop] === true && $.terminal.prism_formatters[prop] === true) {
+                return true;
+            }
+        }
+        return false;
+    }
+    $.terminal.prism = function prism(language, string, options) {
+        if (!should_render(options)) {
+            return string;
+        }
         if (language === 'website') {
             var re = /(<\/?\s*(?:script|style)[^>]*>)/g;
             var style;
@@ -161,22 +197,34 @@
             string = string.split(format_split_re).filter(Boolean).map(function(string) {
                 if (string.match(/^\x00/)) {
                     return string.replace(/\x00/g, '');
-                } else {
-                    return $.terminal.escape_brackets(string);
                 }
+                return $.terminal.escape_brackets(string);
             }).join('');
         }
         return string;
+    };
+    $.terminal.prism_formatters = {
+        echo: true,
+        animation: true,
+        command: true
     };
     $.terminal.syntax = function syntax(language) {
         // we create function with name so we will see it in developer tools
         // we bind jQuery as argument so it will work when jQuery with noConflict
         // is added after this script
-        var fn = new Function('$', 'return function syntax_' + language +
-                              '(string) { return $.terminal.prism("' + language +
-                              '", string); }')($);
-        // disable warning because it may create nested formatting
+        var name = 'syntax_' + language;
+        var fn = new Function('$', 'return function ' + name +
+                              '(string, options) { return $.terminal.prism("' + language +
+                              '", string, options); }')($);
         fn.__no_warn__ = true;
+        var formatters = $.terminal.defaults.formatters;
+        $.terminal.defaults.formatters = formatters.filter(function(formatter) {
+            if (typeof formatter !== 'function') {
+                return true;
+            }
+            return formatter.name !== name;
+        });
+        // disable warning because it may create nested formatting
         $.terminal.new_formatter(fn);
     };
 });

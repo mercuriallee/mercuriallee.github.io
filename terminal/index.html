@@ -1,92 +1,116 @@
 <!DOCTYPE html>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <html>
-	<meta charset='utf-8'>
-	<head>
-		<script>
-			window.COMMANDS = {};
-		</script>
-		<title> Mercurial's Terminal </title>
-		<link rel='stylesheet' href='../jslibs/jquery.terminal.css' />
-		<script src='../jslibs/jquery.js'> </script>
-		<script src='../jslibs/jquery.terminal.js'> </script>
+    <meta charset='utf-8'>
+    <head>
+        <script>
+            window.COMMANDS = {};
+        </script>
+        <title> Mercurial's Terminal </title>
+        <script src="https://code.jquery.com/jquery-1.7.2.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/combine/npm/jquery,npm/jquery.terminal/js/jquery.terminal.min.js,npm/jquery.terminal/js/xml_formatting.js,npm/js-polyfills/keyboard.js,npm/prismjs/prism.min.js,npm/jquery.terminal/js/prism.js,npm/jquery.splitter/js/jquery.splitter.min.js"></script>
+        <link href="https://cdn.jsdelivr.net/combine/npm/terminal-prism/css/prism-coy.css,npm/jquery.terminal/css/jquery.terminal.min.css,npm/jquery.splitter/css/jquery.splitter.css" rel="stylesheet"/>
 
-		<script src='../jslibs/math.js'> </script>
+        <script src='../jslibs/math.js'> </script>
+        <script src='../jslibs/less.js'> </script>
+        <script src='../jslibs/dterm.js'> </script>
+        <script src='../jslibs/ascii_table.js'> </script>
+        <script src='../jslibs/pipe.js'> </script>
+        <script src='../jslibs/unix_formatting.js'> </script>
+        <script src='../jslibs/ucwidth.js'> </script>
 
-		<!-- uuid -->
-		<script src='../jslibs/uuid.js'> </script>
+        <script src="../jslibs/autocomplete_menu.js"></script>
 
-		<!-- prism -->
-		<link rel="stylesheet prefetch" href="./prism.css"/>
-		<script src="./prism.js"></script>
-		<script src='./prism_wrapper.js'></script>
+        <!-- emoji -->
+        <script src='../jslibs/emoji.js'> </script>
+        <link rel='stylesheet' href='../jslibs/emoji.css' />
 
-		<!--exit command-->
-		<script src='../bin/exit.js'> </script>
-		<!-- speed command-->
-		<script src='../bin/sptest/main.js'> </script>
+        <!-- uuid -->
+        <script src='../jslibs/uuid.js'> </script>
 
-		<!-- colyseus.js -->
-		<script src='./colyseus.js'> </script>
+        <!--exit command-->
+        <script src='../bin/exit.js'> </script>
+        <!-- speed command-->
+        <script src='../bin/sptest/main.js'> </script>
 
-		<!-- BTree -->
-		<script src='../BTree.js'> </script>
-		<!-- Sudoku Solver -->
-		<script src='../sudoku.js'> </script>
-		<!-- bin/DLRank -->
-		<script src='../bin/dlrank.js'> </script>
-		<!-- bin/currency -->
-		<script src='../bin/currency.js'> </script>
-		<!-- 24-game -->
-		<script src='../bin/24_game.js'> </script>
+        <!-- colyseus.js -->
+        <!-- <script src='./colyseus.js'> </script> -->
 
-		<!-- colyseus_client.js -->
-		<script src='../mahjong/colyseus_client.js'> </script>
+        <!-- BTree -->
+        <script src='../BTree.js'> </script>
+        <!-- Sudoku Solver -->
+        <script src='../sudoku.js'> </script>
+        <!-- bin/DLRank -->
+        <script src='../bin/dlrank.js'> </script>
+        <!-- bin/currency -->
+        <script src='../bin/currency.js'> </script>
+        <!-- 24-game -->
+        <script src='../bin/24_game.js'> </script>
+        <!-- 华容道 -->
+        <script src='../hrd.js'> </script>
 
-		<!-- msgpack.js -->
-		<script src='../jslibs/msgpack.js'> </script>
+        <!-- colyseus_client.js -->
+        <!-- <script src='../mahjong/colyseus_client.js'> </script> -->
 
-		<!-- normaldist.js -->
-		<script src='../bin/normaldist.js'> </script>
-		
-		<!-- sliding puzzle solver -->
-		<script src='./slidingPuzzleSolver.js'> </script>
-	</head>
+        <!-- msgpack.js -->
+        <script src='../jslibs/msgpack.js'> </script>
 
-	<body>
-		<script>
-			jQuery(function($, undefined){
-				$('body').terminal(function(command){
-					window.terminal = this;
-					if(command !== '') {
-						if(typeof(window.COMMANDS[command.replace(/\s/g,'')]) == 'function') {
-							window.COMMANDS[command]();
-						} else {
-							try {
-								var result = window.eval(command);
-								if(result !== undefined) {
-									this.echo(new String(result));
-								}
-							} catch(e) {
-								this.error(new String(e));
-							}
-						}
-					} else {
-						this.echo('');
-					}
-				}, {
-					greetings: "Welcome to Mercurial's JQuery Terminal",
-					name: "Mercurial's Terminal",
-					width: '100%',
-					height: '100%',
-					prompt: 'js> '
-				});
+        <!-- normaldist.js -->
+        <script src='../bin/normaldist.js'> </script>
 
-				//Hightlight support.
-				// There is a bug with ']'
-				//$.terminal.syntax('javascript');
-			});
-		</script>
+        <!-- sliding puzzle solver -->
+        <script src='./slidingPuzzleSolver.js'> </script>
+    </head>
 
-	</body>
+    <body>
+        <script>
+            var __EVAL = (s) => eval(`void (__EVAL = ${__EVAL}); ${s}`);
+
+            function repr(object) {
+                if (object) {
+                    if (object instanceof $.fn.init) {
+                        return '#&lt;jQuery&gt;';
+                    } else if (typeof object === 'object') {
+                        var name = object.constructor.name;
+                        if (name) {
+                            return `#&lt;${name}&gt;`;
+                        } else {
+                            return object.toString();
+                        }
+                    } else {
+                        return new String(object);
+                    }
+                } else if (object === null) {
+                    return 'null';
+                }
+            }
+            function repl(fn) {
+                return function(code) {
+                    if (code !== '') {
+                        try {
+                            var result = fn(code);
+                            if (result) {
+                                this.echo(repr(result));
+                            }
+                        } catch(e) {
+                            this.error(new String(e));
+                        }
+                    }
+                };
+            }
+            var term = $('body').terminal(repl((code) => __EVAL(code)), {
+                greetings: "Welcome to Mercurial's JQuery Terminal",
+                name: "Mercurial's Terminal",
+                width: '100%',
+                height: '100%',
+                prompt: 'js> ',
+                autocompleteMenu: true,
+                completion: ['foo', 'bar', 'baz'],
+            });
+
+            $.terminal.syntax('javascript');
+        </script>
+
+    </body>
 
 </html>
