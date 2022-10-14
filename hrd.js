@@ -1,5 +1,19 @@
-const HRD = {};
+/**
+ * @param {string, [string]} quiz
+ * @return {void}
+ */
+const HRD = function(quiz) {
+
+    if(typeof(quiz) == 'string') {
+        HRD.Board.eval(quiz).resolve().descriptSolution();
+    }
+    if(typeof(quiz) == 'object' && toString.apply(quiz) == '[object Array]') {
+        return quiz.map(q=> HRD.Board.eval(q).resolve().descriptSolution());
+    }
+    return;
+};
 (function(){
+
     const GlobalHash = (function() {
         let o = {};
         o.count = 0;
