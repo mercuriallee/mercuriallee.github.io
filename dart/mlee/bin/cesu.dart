@@ -20,7 +20,7 @@ void main() {
   } else if(Platform.isLinux) {
     fetchInstantBytes = fetchInstantBytesLinux;
   } else {
-    throw Error();
+    throw 'Not support ${Platform.operatingSystem} system.';
   }
 
   dumpDeltaBytes(fetchInstantBytes()).forEach(print);
