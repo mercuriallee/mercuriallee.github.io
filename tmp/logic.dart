@@ -73,7 +73,10 @@ Iterable<List<Choice>> iterateAndSolve() sync* {
 }
 
 void main() {
+  var startTime = DateTime.now();
   var answer = iterateAndSolve().last;
+  var endTime = DateTime.now();
+  print('Cost: ${endTime.difference(startTime).inMilliseconds}ms.');
   answer.asMap().forEach((i, e)=>print('${i+1}: ${i<9?' ':''}$e'));
 }
 
