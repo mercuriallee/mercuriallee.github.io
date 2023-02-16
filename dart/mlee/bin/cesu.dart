@@ -90,5 +90,6 @@ Stream<String> dumpDeltaBytes(Stream<Map<String, IOBytes>> instantBytes) async* 
       printStr += 'Out:${' '*leftPadLength}${humanreadableBytes(outBytes)}\n';
     }
     yield printStr;
+    previousMap = currentMap;
   }
 }
