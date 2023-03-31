@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:english_words/english_words.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -51,6 +53,12 @@ class MyAppState extends ChangeNotifier {
     }
     notifyListeners();
   }
+
+  void removeFavorite(pair) {
+    favorites.remove(pair);
+
+    notifyListeners();
+  }
 }
 
 class MyHomePage extends StatefulWidget {
@@ -75,36 +83,57 @@ class _MyHomePageState extends State<MyHomePage> {
         throw UnimplementedError('no widget implemented with $selectedIndex');
     }
 
-    return LayoutBuilder(builder: (context, constraints) {
-      return Scaffold(
-          body: Row(
-        children: [
+    return Scaffold(body: LayoutBuilder(builder: (context, constraints) {
+      var mainArea = ColoredBox(
+        color: Theme.of(context).colorScheme.primaryContainer,
+        child: AnimatedSwitcher(
+          duration: Duration(milliseconds: 200),
+          child: page,
+        ),
+      );
+
+      if (constraints.maxWidth < 450) {
+        return Column(children: [
+          Expanded(child: mainArea),
           SafeArea(
-              child: NavigationRail(
-            extended: constraints.maxWidth >= 600,
-            destinations: [
-              NavigationRailDestination(
-                  icon: Icon(Icons.home), label: Text('home')),
-              NavigationRailDestination(
-                  icon: Icon(Icons.favorite), label: Text('favorites'))
+              child: BottomNavigationBar(
+            items: [
+              BottomNavigationBarItem(icon: Icon(Icons.home), label: 'home'),
+              BottomNavigationBarItem(
+                  icon: Icon(Icons.favorite), label: 'favorites'),
             ],
-            selectedIndex: selectedIndex,
-            onDestinationSelected: (index) {
+            currentIndex: selectedIndex,
+            onTap: (index) {
               setState(() {
                 selectedIndex = index;
               });
             },
           )),
-          Expanded(
-              child: Container(
-            color: Theme.of(context).colorScheme.primaryContainer,
-            child: Column(
-              children: [page],
-            ),
-          ))
-        ],
-      ));
-    });
+        ]);
+      } else {
+        return Row(
+          children: [
+            SafeArea(
+                child: NavigationRail(
+              extended: constraints.maxWidth >= 600,
+              destinations: [
+                NavigationRailDestination(
+                    icon: Icon(Icons.home), label: Text('home')),
+                NavigationRailDestination(
+                    icon: Icon(Icons.favorite), label: Text('favorites'))
+              ],
+              selectedIndex: selectedIndex,
+              onDestinationSelected: (index) {
+                setState(() {
+                  selectedIndex = index;
+                });
+              },
+            )),
+            Expanded(child: mainArea)
+          ],
+        );
+      }
+    }));
   }
 }
 
@@ -129,16 +158,16 @@ class _HistoryListState extends State<HistoryList> {
     final appState = context.watch<MyAppState>();
     appState.historyListKey = _key;
 
-    return Placeholder();
     return ShaderMask(
       shaderCallback: (bounds) => _maskingGradient.createShader(bounds),
       blendMode: BlendMode.dstIn,
       child: AnimatedList(
         key: _key,
+        padding: EdgeInsets.only(top: 100),
         reverse: true,
+        initialItemCount: appState.history.length,
         itemBuilder: (context, index, animation) {
           final pair = appState.history[index];
-          return Placeholder();
           return SizeTransition(
               sizeFactor: animation,
               child: Center(
@@ -151,7 +180,7 @@ class _HistoryListState extends State<HistoryList> {
                         semanticsLabel: pair.asPascalCase,
                       ),
                       icon: appState.favorites.contains(pair)
-                          ? Icon(Icons.favorite)
+                          ? Icon(Icons.favorite, size: 12)
                           : SizedBox())));
         },
       ),
@@ -166,58 +195,38 @@ class FavoritesPage extends StatelessWidget {
     var favorites = appState.favorites;
     var colorTheme = Theme.of(context).colorScheme;
 
-    print(favorites.length);
-
-    return Placeholder();
-    return Column(
-      children: [
-        ListView(
-          children: [
-            for (var i = 0; i < favorites.length; i++)
-              FavoritesListTile(
-                  title: favorites[i].asCamelCase,
-                  backgroundColor: i % 2 == 0
-                      ? colorTheme.primaryContainer
-                      : colorTheme.secondaryContainer),
-          ],
-        ),
-      ],
-    );
-  }
-}
-
-class FavoritesListTile extends StatelessWidget {
-  const FavoritesListTile({
-    super.key,
-    required this.title,
-    required this.backgroundColor,
-  });
-
-  final Color backgroundColor;
-  final String title;
-
-  @override
-  Widget build(BuildContext context) {
-    var colorTheme = Theme.of(context).colorScheme;
-    var style = Theme.of(context)
-        .textTheme
-        .bodyMedium!
-        .copyWith(color: colorTheme.onPrimaryContainer);
+    if (favorites.isEmpty) {
+      return Center(child: Text('You have no favorites yet.'));
+    }
 
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
-            padding: const EdgeInsets.fromLTRB(2, 0, 2, 0),
-            child: Container(
-              color: backgroundColor,
-              child: ListTile(
-                  title: Center(
-                child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Text(title, style: style),
-                ),
-              )),
-            )),
+          padding: const EdgeInsets.all(30.0),
+          child: Text('You have ${favorites.length} favorites:'),
+        ),
+        Expanded(
+          child: GridView(
+            gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+                maxCrossAxisExtent: 400, childAspectRatio: 400 / 80),
+            children: [
+              for (var pair in favorites)
+                ListTile(
+                    leading: IconButton(
+                      icon: Icon(Icons.delete_outline),
+                      color: colorTheme.primary,
+                      onPressed: () {
+                        appState.removeFavorite(pair);
+                      },
+                    ),
+                    title: Text(
+                      pair.asCamelCase,
+                      semanticsLabel: pair.asPascalCase,
+                    ))
+            ],
+          ),
+        ),
       ],
     );
   }
@@ -238,6 +247,8 @@ class GeneratorPage extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
+          Expanded(flex: 3, child: HistoryList()),
+          SizedBox(height: 10),
           BigCard(pair: pair),
           SizedBox(height: 10),
           Row(
@@ -256,7 +267,8 @@ class GeneratorPage extends StatelessWidget {
                   },
                   child: Text('next')),
             ],
-          )
+          ),
+          Spacer(flex: 2),
         ],
       ),
     );
