@@ -398,7 +398,6 @@ const HRD = function(quiz) {
          */
         constructor(nodes) {
             this.nodes = [];
-            this.Tails = new WeakMap;
             nodes.forEach(n=>this.push(n));
         } 
 
