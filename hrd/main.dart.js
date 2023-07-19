@@ -74441,7 +74441,8 @@ A.a7A.prototype={
 $1(a){return J.e1(a,t.Bv)},
 $S:155}
 A.ps.prototype={
-L(a){return A.J8(A.U8(null,B.PP),new A.zs(this.c,this.e,this.f,null,null),!1)}}
+L(a){var s=this
+return A.J8(A.U8(null,B.PP),new A.zs(s.c,s.e,s.f,null,s.a),!1)}}
 A.zs.prototype={
 am(){return A.aAb()}}
 A.Mb.prototype={
@@ -74982,7 +74983,7 @@ m=A.kW(A.dX(J.aD(m,s).b,o,o,o,o,o,o),o,o)
 r=n.d
 r.toString
 q=t.p
-r=A.pk(A.a([A.dX("Custom level "+J.aD(r,s).b+" will delete.",o,B.bd,o,o,o,o)],q),B.bi,B.b8,B.bn)
+r=A.pk(A.a([A.dX("What do to do with saved level '"+J.aD(r,s).b+"'?",o,B.bd,o,o,o,o)],q),B.bi,B.b8,B.bn)
 p=this.c
 return A.ale(A.a([A.vu(A.U(p).ax.at,B.D6,new A.adp(n,s,p),o,o),A.vu(A.U(p).ax.b,B.D8,new A.adq(n,s,p),o,o),new A.vt(B.D4,A.U(p).ax.b,new A.adr(p),o,o,B.RY,o)],q),B.qI,r,m)},
 $S:158}
