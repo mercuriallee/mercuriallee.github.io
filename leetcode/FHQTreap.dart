@@ -2,234 +2,125 @@ import 'dart:math';
 
 abstract class TreeNode<V extends Comparable> {
   bool get isEmpty;
-  int get size;
-  V? get minOrNull;
-  V? get maxOrNull;
-  FHQTreapNode<V> insert(V v);
-  TreeNode<V> remove(V v);
   bool contains(V v);
-  Iterable<FHQTreapNode<V>> inorder();
-  TreeNodePieces<V> split(V v);
-  TreeNode<V> merge(TreeNode<V> other);
+  TreapNode<V> insert(V v);
+  TreeNode<V> remove(V v);
+  Iterable<TreapNode<V>> inorder();
+  Iterable<TreapNode<V>> preorder();
+
+  V? get maxOrNull;
+  V? get minOrNull;
 }
 
-class TreeNodePieces<V extends Comparable> {
-  TreeNode<V> smaller;
-  TreeNode<V> identical;
-  TreeNode<V> larger;
-  TreeNodePieces(
-      {required this.smaller, required this.identical, required this.larger});
-}
-
-class EmptyTreeNode<V extends Comparable> implements TreeNode<V> {
-  static final random = Random();
+class EmptyTreeNode<V extends Comparable> extends TreeNode<V> {
+  @override
   bool get isEmpty => true;
-  int get size => 0;
-  V? get minOrNull => null;
-  V? get maxOrNull => null;
-  FHQTreapNode<V> insert(V v) => FHQTreapNode(
+  @override
+  bool contains(V v) => false;
+  @override
+  TreapNode<V> insert(V v) => TreapNode(
       value: v,
       left: EmptyTreeNode(),
       right: EmptyTreeNode(),
-      weight: 1,
-      rank: random.nextDouble());
+      rank: Random().nextDouble());
   TreeNode<V> remove(V v) => this;
-  bool contains(V v) => false;
-  Iterable<FHQTreapNode<V>> inorder() sync* {}
-  TreeNodePieces<V> split(V v) => TreeNodePieces<V>(
-      smaller: EmptyTreeNode(),
-      identical: EmptyTreeNode(),
-      larger: EmptyTreeNode());
-  TreeNode<V> merge(TreeNode<V> other) => other;
+  Iterable<TreapNode<V>> inorder() sync* {}
+  Iterable<TreapNode<V>> preorder() sync* {}
+
+  @override
+  V? get maxOrNull => null;
+  @override
+  V? get minOrNull => null;
 }
 
-class FHQTreapNode<V extends Comparable> implements TreeNode<V> {
+class TreapNode<V extends Comparable> extends TreeNode<V> {
   V value;
   double rank;
-  int weight;
-  int size;
   TreeNode<V> left;
   TreeNode<V> right;
 
   bool get isEmpty => false;
-  V? get minOrNull => left.isEmpty ? value : left.minOrNull;
-  V? get maxOrNull => right.isEmpty ? value : right.maxOrNull;
-  FHQTreapNode<V> insert(V v) {
-    final pieces = split(v),
-        smaller = pieces.smaller,
-        identical = pieces.identical,
-        larger = pieces.larger;
-    return identical is FHQTreapNode<V>
-        ? FHQTreapNode<V>(
-                value: v,
-                left: EmptyTreeNode(),
-                right: EmptyTreeNode(),
-                weight: identical.weight + 1,
-                rank: identical.rank)
-            .merge(smaller)
-            .merge(larger)
-        : EmptyTreeNode<V>().insert(v).merge(smaller).merge(larger);
-  }
-
-  TreeNode<V> remove(V v) {
-    final pieces = split(v),
-        smaller = pieces.smaller,
-        identical = pieces.identical,
-        larger = pieces.larger;
-    return identical is FHQTreapNode<V> && identical.weight > 1
-        ? FHQTreapNode<V>(
-                value: v,
-                weight: identical.weight - 1,
-                rank: identical.rank,
-                left: EmptyTreeNode(),
-                right: EmptyTreeNode())
-            .merge(smaller)
-            .merge(larger)
-        : smaller.merge(larger);
-  }
-
   bool contains(V v) => v.compareTo(value) == 0
       ? true
-      : ((v.compareTo(value) < 0) ? left.contains(v) : right.contains(v));
-  Iterable<FHQTreapNode<V>> inorder() sync* {
+      : (v.compareTo(value) < 0 ? left.contains(v) : right.contains(v));
+  @override
+  V? get maxOrNull =>
+      right.isEmpty ? value : (right as TreapNode<V>).maxOrNull!;
+  @override
+  V? get minOrNull => left.isEmpty ? value : (left as TreapNode<V>).minOrNull!;
+  @override
+  TreapNode<V> insert(V v) {
+    var node = v.compareTo(value) < 0
+        ? TreapNode(
+            value: value, left: left.insert(v), right: right, rank: rank)
+        : TreapNode(
+            value: value, left: left, right: right.insert(v), rank: rank);
+    if (node.left is TreapNode && (node.left as TreapNode).rank > node.rank)
+      node = node.rightRotate();
+    else if (node.right is TreapNode &&
+        (node.right as TreapNode).rank > node.rank) node = node.leftRotate();
+    return node;
+  }
+
+  @override
+  TreeNode<V> remove(V v) {
+    if (!contains(v)) return this;
+    if (v.compareTo(value) < 0)
+      return TreapNode(
+          value: value, left: left.remove(v), right: right, rank: rank);
+    else if (v.compareTo(value) > 0)
+      return TreapNode(
+          value: value, left: left, right: right.remove(v), rank: rank);
+    else {
+      if (left.isEmpty) return right;
+      if (right.isEmpty) return left;
+      if ((left as TreapNode).rank < (right as TreapNode).rank) {
+        return leftRotate().remove(v);
+      } else {
+        return rightRotate().remove(v);
+      }
+    }
+  }
+
+  TreapNode<V> leftRotate() {
+    if (right.isEmpty) throw "Cannot left rotate a empty right child!";
+    final rightChild = right as TreapNode<V>;
+    final newLeft =
+        TreapNode(value: value, left: left, right: rightChild.left, rank: rank);
+    return TreapNode(
+        value: rightChild.value,
+        left: newLeft,
+        right: rightChild.right,
+        rank: rightChild.rank);
+  }
+
+  TreapNode<V> rightRotate() {
+    if (left.isEmpty) throw "Cannot right rotate a empty left child!";
+    final leftChild = left as TreapNode<V>;
+    final newRight = TreapNode(
+        value: value, left: leftChild.right, right: right, rank: rank);
+    return TreapNode(
+        value: leftChild.value,
+        left: leftChild.left,
+        right: newRight,
+        rank: leftChild.rank);
+  }
+
+  Iterable<TreapNode<V>> inorder() sync* {
     for (final node in left.inorder()) yield node;
     yield this;
     for (final node in right.inorder()) yield node;
   }
 
-  TreeNodePieces<V> split(V v) {
-    if (v.compareTo(value) == 0)
-      return TreeNodePieces<V>(
-          smaller: left,
-          identical: FHQTreapNode(
-              value: v,
-              left: EmptyTreeNode(),
-              right: EmptyTreeNode(),
-              weight: weight,
-              rank: rank),
-          larger: right);
-    TreeNodePieces<V> pieces;
-    TreeNode<V> nextSmaller, nextLarger, nextIdentical;
-    if (v.compareTo(value) < 0) {
-      pieces = left.split(v);
-      nextSmaller = pieces.smaller;
-      nextIdentical = pieces.identical;
-      nextLarger = pieces.larger;
-      return TreeNodePieces<V>(
-          smaller: nextSmaller,
-          identical: nextIdentical,
-          larger: FHQTreapNode(
-              value: value,
-              left: nextLarger,
-              weight: weight,
-              right: right,
-              rank: rank));
-    } else {
-      pieces = right.split(v);
-      nextSmaller = pieces.smaller;
-      nextIdentical = pieces.identical;
-      nextLarger = pieces.larger;
-      return TreeNodePieces<V>(
-          smaller: FHQTreapNode(
-              value: value,
-              left: left,
-              right: nextSmaller,
-              weight: weight,
-              rank: rank),
-          identical: nextIdentical,
-          larger: nextLarger);
-    }
+  Iterable<TreapNode<V>> preorder() sync* {
+    yield this;
+    for (final node in left.inorder()) yield node;
+    for (final node in right.inorder()) yield node;
   }
 
-  FHQTreapNode<V> merge(TreeNode<V> other) {
-    if (other.isEmpty) return this;
-    var smaller = other as FHQTreapNode<V>, larger = this;
-    if (smaller.value.compareTo(larger.value) > 0) {
-      final temp = smaller;
-      smaller = larger;
-      larger = temp;
-    }
-    return smaller.rank <= larger.rank
-        ? FHQTreapNode(
-            value: larger.value,
-            left: smaller.merge(larger.left),
-            weight: larger.weight,
-            right: larger.right,
-            rank: larger.rank)
-        : FHQTreapNode(
-            value: smaller.value,
-            left: smaller.left,
-            right: smaller.right.merge(larger),
-            weight: smaller.weight,
-            rank: smaller.rank);
-  }
-
-  FHQTreapNode(
+  TreapNode(
       {required this.value,
       required this.left,
       required this.right,
-      required this.weight,
-      required this.rank})
-      : size = weight + left.size + right.size;
-}
-
-class NodeData implements Comparable<NodeData> {
-  int id;
-  int hits;
-  int key;
-  int value;
-
-  NodeData(
-      {required this.key,
-      required this.value,
-      required this.hits,
-      required this.id});
-
-  @override
-  compareTo(NodeData other) {
-    return other.hits != hits
-        ? hits.compareTo(other.hits)
-        : (id != other.id ? id.compareTo(other.id) : key.compareTo(other.key));
-  }
-}
-
-class LFUCache {
-  static int increaseKey = 0;
-  int capacity;
-  Map<int, NodeData> map = {};
-  TreeNode<NodeData> root = EmptyTreeNode();
-
-  LFUCache(this.capacity);
-
-  int get(int key) {
-    var cachedNode = map[key];
-    if (cachedNode == null) return -1;
-    root = root.remove(cachedNode);
-    cachedNode
-      ..hits = cachedNode.hits + 1
-      ..id = increaseKey++;
-    root = root.insert(cachedNode);
-    return cachedNode.value;
-  }
-
-  void put(int key, int value) {
-    var cachedNode = map[key];
-    if (cachedNode == null) {
-      if (root.size == capacity && !root.isEmpty) {
-        final min = root.minOrNull!;
-        root = root.remove(min);
-        map.remove(min.key);
-      }
-      cachedNode = NodeData(key: key, value: value, hits: 1, id: increaseKey++);
-      root = root.insert(cachedNode);
-      map[key] = cachedNode;
-    } else {
-      root = root.remove(cachedNode);
-      cachedNode
-        ..hits = cachedNode.hits + 1
-        ..id = increaseKey++
-        ..value = value;
-      root = root.insert(cachedNode);
-    }
-  }
+      required this.rank});
 }
