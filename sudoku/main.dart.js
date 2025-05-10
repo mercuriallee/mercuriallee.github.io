@@ -60013,13 +60013,18 @@ a2_(){var s=this,r=s.d
 if(r!=null)s.mr(r)
 s.as.H(0)
 s.am(new A.Qn(s))},
-a24(a){var s,r=this,q=r.e,p=r.d
-p.toString
-s=q.dJ(a)
-if(s.gP(s)){s=a.dJ(q)
+a24(a){var s,r,q,p,o=this,n={}
+n.a=a
+s=t.S
+r=A.d9(o.e,s)
+s=n.a=A.d9(a,s)
+q=o.d
+q.toString
+p=r.dJ(s)
+if(p.gP(p)){s=s.dJ(r)
 s=s.gP(s)}else s=!1
 if(s)return
-r.x.C(0,new A.w6(new A.Qs(r,p,q),new A.Qt(r,p,a)))},
+o.x.C(0,new A.w6(new A.Qs(o,q,r),new A.Qt(n,o,q)))},
 M(a){var s=this,r=null,q=A.eB("checkButton",new A.PR(s,a)),p=A.eB("undoButton",new A.PS(s,a)),o=A.eB("redoButton",new A.PT(s,a)),n=A.eB("resetButton",new A.PU(s,a)),m=A.eB("numbersPad",new A.PV(s)),l=A.eB("board",new A.PW(s,a))
 return A.rf(B.X,new A.Bi(s.r,new A.PX(s),new A.l9(new A.PY(q,A.eB("colorPickerButton",new A.PZ(s)),p,o,n,l,m),r),r),B.ai,!1,r,r,r,r,r,r,r,r,r,r,r,r,r,r,new A.Q_(s),r,r,r)}}
 A.Q5.prototype={
@@ -60161,13 +60166,13 @@ A.Qs.prototype={
 $0(){var s=this.b
 s=this.a.f[s.b][s.a]
 s.H(0)
-s.I(0,A.d9(this.c,t.S))},
+s.I(0,this.c)},
 $S:28}
 A.Qt.prototype={
-$0(){var s=this.b
-s=this.a.f[s.b][s.a]
+$0(){var s=this.c
+s=this.b.f[s.b][s.a]
 s.H(0)
-s.I(0,A.d9(this.c,t.S))},
+s.I(0,this.a.a)},
 $S:28}
 A.PR.prototype={
 $0(){return this.a.KF(this.b)},
